@@ -39,6 +39,15 @@ secrets.properties
 .env.*
 !.env.example
 
+# Local AI agents and skills
+.agents/
+.agent/
+.skills/
+.codex/
+**/AGENTS.md
+**/SKILL.md
+.github/workflows/android.yml
+
 # Test, lint and generated reports
 lint-results*
 test-results/
