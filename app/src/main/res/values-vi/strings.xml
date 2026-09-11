@@ -1,0 +1,33 @@
+<resources>
+    <string name="app_name">AppBase</string>
+    <string name="notification_channel_name">Thông báo chung</string>
+    <string name="notification_channel_description">Cập nhật sản phẩm và các thông báo quan trọng</string>
+    <string name="login_title">Chào mừng bạn trở lại</string>
+    <string name="login_subtitle">Đăng nhập để tiếp tục sử dụng AppBase.</string>
+    <string name="email">Email</string>
+    <string name="password">Mật khẩu</string>
+    <string name="display_name">Tên hiển thị</string>
+    <string name="login_action">Đăng nhập</string>
+    <string name="register_action">Tạo tài khoản</string>
+    <string name="register_title">Tạo tài khoản mới</string>
+    <string name="create_account">Tạo tài khoản</string>
+    <string name="back_to_login">Quay lại đăng nhập</string>
+    <string name="demo_auth_hint">Bản debug dùng đăng nhập demo cục bộ. Nhập email hợp lệ và mật khẩu có ít nhất 6 ký tự.</string>
+    <string name="tab_home">Trang chủ</string>
+    <string name="tab_explore">Khám phá</string>
+    <string name="tab_settings">Cài đặt</string>
+    <string name="home_title">AppBase đã sẵn sàng</string>
+    <string name="home_description">Dùng màn hình này làm điểm bắt đầu cho tính năng sản phẩm đầu tiên.</string>
+    <string name="explore_title">Khám phá</string>
+    <string name="explore_description">Màn hình mẫu minh họa trạng thái bottom navigation được giữ lại.</string>
+    <string name="settings_title">Cài đặt</string>
+    <string name="theme_title">Giao diện</string>
+    <string name="theme_system">Theo hệ thống</string>
+    <string name="theme_light">Sáng</string>
+    <string name="theme_dark">Tối</string>
+    <string name="selected_format">%1$s (đang chọn)</string>
+    <string name="enable_notifications">Bật thông báo</string>
+    <string name="logout_action">Đăng xuất</string>
+    <string name="firebase_connected">Đã phát hiện cấu hình Firebase.</string>
+    <string name="firebase_not_connected">Firebase là tùy chọn và hiện chưa được cấu hình.</string>
+</resources>

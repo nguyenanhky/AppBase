@@ -1,0 +1,51 @@
+# Gradle and Kotlin
+.gradle/
+.kotlin/
+**/build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Local Android SDK configuration
+local.properties
+
+# Android Studio and IDE files
+.idea/
+*.iml
+*.ipr
+*.iws
+.fleet/
+.vscode/
+
+# Android build and native tooling
+captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.aab
+*.ap_
+*.dex
+*.hprof
+
+# Signing credentials and private configuration
+*.jks
+*.keystore
+keystore.properties
+secrets.properties
+
+# Firebase configuration is supplied per product/environment
+**/google-services.json
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Test, lint and generated reports
+lint-results*
+test-results/
+reports/
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# Room schemas in app/schemas stay tracked for migration tests.

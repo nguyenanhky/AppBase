@@ -1,0 +1,33 @@
+<resources>
+    <string name="app_name">AppBase</string>
+    <string name="notification_channel_name">General notifications</string>
+    <string name="notification_channel_description">Product updates and important messages</string>
+    <string name="login_title">Welcome back</string>
+    <string name="login_subtitle">Sign in to continue to AppBase.</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="display_name">Display name</string>
+    <string name="login_action">Sign in</string>
+    <string name="register_action">Create an account</string>
+    <string name="register_title">Create your account</string>
+    <string name="create_account">Create account</string>
+    <string name="back_to_login">Back to sign in</string>
+    <string name="demo_auth_hint">Debug builds use local demo authentication. Enter any valid email and a password with at least 6 characters.</string>
+    <string name="tab_home">Home</string>
+    <string name="tab_explore">Explore</string>
+    <string name="tab_settings">Settings</string>
+    <string name="home_title">AppBase is ready</string>
+    <string name="home_description">Use this screen as the starting point for your first product feature.</string>
+    <string name="explore_title">Explore</string>
+    <string name="explore_description">This placeholder demonstrates preserved bottom navigation state.</string>
+    <string name="settings_title">Settings</string>
+    <string name="theme_title">Theme</string>
+    <string name="theme_system">Use system theme</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="selected_format">%1$s (selected)</string>
+    <string name="enable_notifications">Enable notifications</string>
+    <string name="logout_action">Sign out</string>
+    <string name="firebase_connected">Firebase configuration detected.</string>
+    <string name="firebase_not_connected">Firebase is optional and is not configured yet.</string>
+</resources>
