@@ -6,11 +6,20 @@ plugins {
     alias(libs.plugins.room)
 }
 
+import java.util.Properties
+
 val hasGoogleServices = file("google-services.json").exists()
 if (hasGoogleServices) {
     apply(plugin = "com.google.gms.google-services")
     apply(plugin = "com.google.firebase.crashlytics")
 }
+
+// Release signing: keystore.properties at the project root (local) or SIGNING_* environment variables (CI).
+val keystoreProperties = Properties().apply {
+    val file = rootProject.file("keystore.properties")
+    if (file.exists()) file.inputStream().use(::load)
+}
+fun signingValue(key: String, env: String): String? = keystoreProperties.getProperty(key) ?: System.getenv(env)
 
 android {
     namespace = "com.viettel.appbase"
@@ -24,25 +33,56 @@ android {
         applicationId = "com.viettel.appbase"
         minSdk = 24
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0.0"
+        // CI overrides with -PversionCode=<build number> -PversionName=<tag>.
+        versionCode = providers.gradleProperty("versionCode").orNull?.toInt() ?: 1
+        versionName = providers.gradleProperty("versionName").orNull ?: "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField("String", "BASE_URL", "\"https://example.com/api/\"")
         buildConfigField("Boolean", "FIREBASE_CONFIGURED", hasGoogleServices.toString())
+    }
+
+    flavorDimensions += "environment"
+    productFlavors {
+        // Local demo auth, no backend or Firebase needed.
+        create("mock") {
+            dimension = "environment"
+            buildConfigField("Boolean", "USE_FAKE_AUTH", "true")
+            buildConfigField("String", "BASE_URL", "\"https://dev.example.com/api/\"")
+        }
+        create("dev") {
+            dimension = "environment"
+            buildConfigField("Boolean", "USE_FAKE_AUTH", "false")
+            buildConfigField("String", "BASE_URL", "\"https://dev.example.com/api/\"")
+        }
+        create("prod") {
+            dimension = "environment"
+            buildConfigField("Boolean", "USE_FAKE_AUTH", "false")
+            buildConfigField("String", "BASE_URL", "\"https://example.com/api/\"")
+        }
+    }
+
+    signingConfigs {
+        val storeFilePath = signingValue("storeFile", "SIGNING_STORE_FILE")
+        if (storeFilePath != null) {
+            create("release") {
+                storeFile = rootProject.file(storeFilePath)
+                storePassword = signingValue("storePassword", "SIGNING_STORE_PASSWORD")
+                keyAlias = signingValue("keyAlias", "SIGNING_KEY_ALIAS")
+                keyPassword = signingValue("keyPassword", "SIGNING_KEY_PASSWORD")
+            }
+        }
     }
 
     buildTypes {
         debug {
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-debug"
-            buildConfigField("Boolean", "USE_FAKE_AUTH", "true")
             enableUnitTestCoverage = true
         }
         release {
             isMinifyEnabled = true
             isShrinkResources = true
-            buildConfigField("Boolean", "USE_FAKE_AUTH", "false")
+            signingConfig = signingConfigs.findByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -75,6 +115,13 @@ android {
     }
 }
 
+androidComponents {
+    // Demo auth must never ship to the Play Store.
+    beforeVariants(selector().withBuildType("release").withFlavor("environment" to "mock")) { variant ->
+        variant.enable = false
+    }
+}
+
 room {
     schemaDirectory("$projectDir/schemas")
 }
@@ -89,6 +136,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.datastore)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -97,6 +145,7 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.room.runtime)
     implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.auth)
     implementation(libs.firebase.crashlytics)

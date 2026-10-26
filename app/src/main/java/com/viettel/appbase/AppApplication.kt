@@ -5,26 +5,31 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Build
 import com.viettel.appbase.core.di.appModules
+import com.viettel.appbase.core.firebase.FirebaseProvider
 import com.viettel.appbase.core.utils.Constants
 import com.viettel.appbase.core.utils.CrashlyticsTree
-import com.viettel.appbase.data.repository.FirebaseProvider
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
+import org.koin.core.logger.Level
 import timber.log.Timber
 
 class AppApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         val koinApplication = startKoin {
-            androidLogger()
+            androidLogger(if (BuildConfig.DEBUG) Level.INFO else Level.NONE)
             androidContext(this@AppApplication)
             modules(appModules)
         }
         val firebaseProvider = koinApplication.koin.get<FirebaseProvider>()
-        firebaseProvider.initialize()
-        if (BuildConfig.DEBUG) Timber.plant(Timber.DebugTree())
-        Timber.plant(CrashlyticsTree(firebaseProvider))
+        // Debug crashes stay out of the Crashlytics dashboard.
+        firebaseProvider.crashlyticsOrNull()?.setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG)
+        if (BuildConfig.DEBUG) {
+            Timber.plant(Timber.DebugTree())
+        } else {
+            Timber.plant(CrashlyticsTree(firebaseProvider))
+        }
         createNotificationChannel()
     }
 

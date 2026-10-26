@@ -2,4 +2,9 @@
 <resources>
 
     <style name="Theme.AppBase" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <!-- Launch theme for the system splash screen (androidx core-splashscreen). -->
+    <style name="Theme.AppBase.Starting" parent="Theme.SplashScreen">
+        <item name="postSplashScreenTheme">@style/Theme.AppBase</item>
+    </style>
 </resources>

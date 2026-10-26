@@ -1,5 +1,6 @@
 package com.viettel.appbase.domain.usecase
 
+import com.viettel.appbase.domain.model.AppError
 import com.viettel.appbase.domain.model.AuthSession
 import com.viettel.appbase.domain.model.AuthToken
 import com.viettel.appbase.domain.model.User
@@ -20,7 +21,7 @@ class RegisterUseCaseTest {
     fun `blank display name is rejected`() = runTest {
         val result = useCase("user@example.com", "password", " ")
 
-        assertTrue(result.isFailure)
+        assertTrue(result.exceptionOrNull() is AppError.DisplayNameRequired)
         coVerify(exactly = 0) { repository.register(any(), any(), any()) }
     }
 

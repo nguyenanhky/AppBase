@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ErrorOutline
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -21,7 +21,7 @@ fun ErrorView(message: String, retryLabel: String, onRetry: (() -> Unit)? = null
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(LocalAppSpacing.current.medium),
     ) {
-        Icon(Icons.Default.ErrorOutline, contentDescription = null, tint = MaterialTheme.colorScheme.error)
+        Icon(Icons.Default.Warning, contentDescription = null, tint = MaterialTheme.colorScheme.error)
         Text(message, color = MaterialTheme.colorScheme.error)
         if (onRetry != null) AppButton(text = retryLabel, onClick = onRetry)
     }

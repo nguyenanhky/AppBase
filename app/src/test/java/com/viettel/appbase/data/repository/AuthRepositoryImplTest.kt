@@ -7,6 +7,7 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -55,8 +56,9 @@ class AuthRepositoryImplTest {
     }
 
     @Test
-    fun `refresh persists replacement token`() = runTest {
-        coEvery { backend.refresh() } returns backendSession(accessToken = "new-access")
+    fun `refresh sends stored refresh token and persists replacement`() = runTest {
+        coEvery { dataStore.currentRefreshToken() } returns "stored-refresh"
+        coEvery { backend.refresh("stored-refresh") } returns backendSession(accessToken = "new-access")
         coEvery { userDao.upsert(any()) } returns Unit
         coEvery { dataStore.saveSession(any(), any(), any()) } returns Unit
 
@@ -74,6 +76,13 @@ class AuthRepositoryImplTest {
 
         assertTrue(result.isFailure)
         coVerify(exactly = 0) { dataStore.saveSession(any(), any(), any()) }
+    }
+
+    @Test(expected = CancellationException::class)
+    fun `cancellation is propagated instead of wrapped in Result`() = runTest {
+        coEvery { backend.login(any(), any()) } throws CancellationException("cancelled")
+
+        repository.login("user@example.com", "password")
     }
 
     @Test

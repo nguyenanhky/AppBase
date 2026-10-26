@@ -20,7 +20,6 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -46,14 +45,10 @@ private enum class HomeTab(val icon: ImageVector) {
 }
 
 @Composable
-fun HomeScreen(
-    onLoggedOut: () -> Unit,
-    viewModel: HomeViewModel = koinViewModel(),
-) {
+fun HomeScreen(viewModel: HomeViewModel = koinViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     var currentTab by rememberSaveable { mutableStateOf(HomeTab.HOME) }
     val stateHolder = rememberSaveableStateHolder()
-    LaunchedEffect(state.loggedOut) { if (state.loggedOut) onLoggedOut() }
 
     Scaffold(
         bottomBar = {
@@ -78,7 +73,12 @@ fun HomeScreen(
             when (currentTab) {
                 HomeTab.HOME -> DashboardTab(padding)
                 HomeTab.EXPLORE -> ExploreTab(padding)
-                HomeTab.SETTINGS -> SettingsTab(padding, viewModel)
+                HomeTab.SETTINGS -> SettingsTab(
+                    padding = padding,
+                    themeMode = state.themeMode,
+                    onThemeModeChange = viewModel::setThemeMode,
+                    onLogout = viewModel::logout,
+                )
             }
         }
     }
@@ -108,8 +108,12 @@ private fun ExploreTab(padding: PaddingValues) {
 }
 
 @Composable
-private fun SettingsTab(padding: PaddingValues, viewModel: HomeViewModel) {
-    val themeMode by viewModel.themeMode.collectAsStateWithLifecycle()
+private fun SettingsTab(
+    padding: PaddingValues,
+    themeMode: ThemeMode,
+    onThemeModeChange: (ThemeMode) -> Unit,
+    onLogout: () -> Unit,
+) {
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission(),
     ) { }
@@ -124,7 +128,7 @@ private fun SettingsTab(padding: PaddingValues, viewModel: HomeViewModel) {
             }
             AppButton(
                 text = if (mode == themeMode) stringResource(R.string.selected_format, label) else label,
-                onClick = { viewModel.setThemeMode(mode) },
+                onClick = { onThemeModeChange(mode) },
             )
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -132,7 +136,7 @@ private fun SettingsTab(padding: PaddingValues, viewModel: HomeViewModel) {
                 notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             })
         }
-        AppButton(stringResource(R.string.logout_action), onClick = viewModel::logout)
+        AppButton(stringResource(R.string.logout_action), onClick = onLogout)
     }
 }
 

@@ -1,42 +1,32 @@
 package com.viettel.appbase.feature.auth.login
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import com.viettel.appbase.core.base.BaseViewModel
+import com.viettel.appbase.domain.model.AppError
 import com.viettel.appbase.domain.usecase.LoginUseCase
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 
 data class LoginUiState(
     val email: String = "",
     val password: String = "",
     val isLoading: Boolean = false,
-    val isAuthenticated: Boolean = false,
-    val errorMessage: String? = null,
+    val error: AppError? = null,
 )
 
-class LoginViewModel(private val login: LoginUseCase) : ViewModel() {
-    private val mutableState = MutableStateFlow(LoginUiState())
-    val state: StateFlow<LoginUiState> = mutableState.asStateFlow()
+sealed interface LoginEvent {
+    data object Authenticated : LoginEvent
+}
 
-    fun onEmailChanged(value: String) = mutableState.update { it.copy(email = value, errorMessage = null) }
-    fun onPasswordChanged(value: String) = mutableState.update { it.copy(password = value, errorMessage = null) }
+class LoginViewModel(private val login: LoginUseCase) : BaseViewModel<LoginUiState, LoginEvent>(LoginUiState()) {
+    fun onEmailChanged(value: String) = updateState { copy(email = value, error = null) }
+    fun onPasswordChanged(value: String) = updateState { copy(password = value, error = null) }
 
     fun submit() {
-        val form = state.value
+        val form = currentState
         if (form.isLoading) return
-        viewModelScope.launch {
-            mutableState.update { it.copy(isLoading = true, errorMessage = null) }
-            login(form.email, form.password).fold(
-                onSuccess = { mutableState.update { state -> state.copy(isLoading = false, isAuthenticated = true) } },
-                onFailure = { error ->
-                    mutableState.update { state ->
-                        state.copy(isLoading = false, errorMessage = error.message ?: "Login failed.")
-                    }
-                },
-            )
+        launchSafely(onError = { error -> updateState { copy(isLoading = false, error = error) } }) {
+            updateState { copy(isLoading = true, error = null) }
+            login(form.email, form.password).getOrThrow()
+            updateState { copy(isLoading = false) }
+            sendEvent(LoginEvent.Authenticated)
         }
     }
 }

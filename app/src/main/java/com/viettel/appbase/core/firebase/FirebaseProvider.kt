@@ -1,4 +1,4 @@
-package com.viettel.appbase.data.repository
+package com.viettel.appbase.core.firebase
 
 import android.content.Context
 import com.google.firebase.FirebaseApp

@@ -1,6 +1,7 @@
 package com.viettel.appbase.data.repository
 
 import com.viettel.appbase.core.storage.AppDataStore
+import com.viettel.appbase.core.utils.suspendRunCatching
 import com.viettel.appbase.domain.model.AuthSession
 import com.viettel.appbase.domain.model.AuthToken
 import com.viettel.appbase.domain.model.User
@@ -25,7 +26,7 @@ class FakeAuthRepository(private val appDataStore: AppDataStore) : AuthRepositor
         return saveDemoSession(email, displayName)
     }
 
-    override suspend fun refreshToken(): Result<String> = runCatching {
+    override suspend fun refreshToken(): Result<String> = suspendRunCatching {
         val token = "demo-token-refreshed"
         appDataStore.saveSession(token, "demo-refresh-token", "demo-user")
         token
@@ -33,7 +34,7 @@ class FakeAuthRepository(private val appDataStore: AppDataStore) : AuthRepositor
 
     override suspend fun logout() = appDataStore.clearSession()
 
-    private suspend fun saveDemoSession(email: String, displayName: String): Result<AuthSession> = runCatching {
+    private suspend fun saveDemoSession(email: String, displayName: String): Result<AuthSession> = suspendRunCatching {
         val token = AuthToken("demo-token", "demo-refresh-token")
         val user = User("demo-user", email, displayName)
         appDataStore.saveSession(token.accessToken, token.refreshToken, user.id)

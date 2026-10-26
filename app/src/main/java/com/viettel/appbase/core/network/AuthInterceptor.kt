@@ -13,12 +13,14 @@ class AuthInterceptor(private val tokenProvider: TokenProvider) : Interceptor {
 
         return chain.proceed(
             request.newBuilder()
-                .header("Authorization", "Bearer $token")
+                .header(AUTHORIZATION_HEADER, "$BEARER_PREFIX$token")
                 .build(),
         )
     }
 
     companion object {
         const val SKIP_AUTH_HEADER = "X-Skip-Auth"
+        const val AUTHORIZATION_HEADER = "Authorization"
+        const val BEARER_PREFIX = "Bearer "
     }
 }

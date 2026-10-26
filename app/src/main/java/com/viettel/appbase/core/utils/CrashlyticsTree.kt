@@ -1,7 +1,7 @@
 package com.viettel.appbase.core.utils
 
 import android.util.Log
-import com.viettel.appbase.data.repository.FirebaseProvider
+import com.viettel.appbase.core.firebase.FirebaseProvider
 import timber.log.Timber
 
 class CrashlyticsTree(private val firebaseProvider: FirebaseProvider) : Timber.Tree() {

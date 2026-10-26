@@ -72,7 +72,7 @@ AppBase/
 │       ├── core/                      ← Shared utilities
 │       │   ├── base/
 │       │   │   ├── BaseViewModel.kt
-│       │   │   └── UiState.kt
+│       │   │   └── ObserveEvents.kt
 │       │   ├── extensions/
 │       │   ├── network/
 │       │   │   ├── ApiClient.kt
@@ -175,10 +175,10 @@ AppBase/
 - **OUTPUT:** `AppDatabase.kt` (Room, version 1, export schema), `AppDataStore.kt`, `DatabaseModule.kt` (Koin)
 - **VERIFY:** `./gradlew test` pass; schema file generated tại `schemas/`
 
-#### Task 1.3 — Base ViewModel & UiState
+#### Task 1.3 — Base ViewModel (State + Event)
 - **Agent:** `mobile-developer` | **Priority:** P1 | **Depends:** Task 0.3
 - **INPUT:** Chưa có base class
-- **OUTPUT:** `BaseViewModel.kt`, `UiState.kt` (sealed: Loading/Success/Error/Empty)
+- **OUTPUT:** `BaseViewModel<S, E>` (state data class + one-shot event qua `Channel`, `launchSafely` map lỗi sang `AppError`), `ObserveEvents.kt`
 - **VERIFY:** Unit test state transitions
 
 ---

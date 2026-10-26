@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicReference
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -30,6 +31,8 @@ class AppDataStore(
     }
 
     override fun currentAccessToken(): String? = cachedToken.get()
+
+    suspend fun currentRefreshToken(): String = preferences.first().refreshToken
 
     suspend fun saveSession(accessToken: String, refreshToken: String, userId: String) {
         cachedToken.set(accessToken)

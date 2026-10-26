@@ -8,9 +8,10 @@ data class BackendAuthSession(
     val refreshToken: String = "",
 )
 
+/** Implementations throw [com.viettel.appbase.domain.model.AppError] on failure. */
 interface AuthBackend {
     suspend fun login(email: String, password: String): BackendAuthSession
     suspend fun register(email: String, password: String, displayName: String): BackendAuthSession
-    suspend fun refresh(): BackendAuthSession
+    suspend fun refresh(refreshToken: String): BackendAuthSession
     fun logout()
 }

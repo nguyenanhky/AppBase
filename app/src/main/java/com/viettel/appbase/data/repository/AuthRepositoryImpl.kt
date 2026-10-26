@@ -1,6 +1,7 @@
 package com.viettel.appbase.data.repository
 
 import com.viettel.appbase.core.storage.AppDataStore
+import com.viettel.appbase.core.utils.suspendRunCatching
 import com.viettel.appbase.data.local.dao.UserDao
 import com.viettel.appbase.data.local.entity.CachedUserEntity
 import com.viettel.appbase.domain.model.AuthSession
@@ -19,7 +20,7 @@ class AuthRepositoryImpl(
     private val refreshMutex = Mutex()
     override val isAuthenticated: Flow<Boolean> = appDataStore.isAuthenticated
 
-    override suspend fun login(email: String, password: String): Result<AuthSession> = runCatching {
+    override suspend fun login(email: String, password: String): Result<AuthSession> = suspendRunCatching {
         persist(backend.login(email, password))
     }
 
@@ -27,12 +28,12 @@ class AuthRepositoryImpl(
         email: String,
         password: String,
         displayName: String,
-    ): Result<AuthSession> = runCatching {
+    ): Result<AuthSession> = suspendRunCatching {
         persist(backend.register(email, password, displayName))
     }
 
     override suspend fun refreshToken(): Result<String> = refreshMutex.withLock {
-        runCatching { persist(backend.refresh()).token.accessToken }
+        suspendRunCatching { persist(backend.refresh(appDataStore.currentRefreshToken())).token.accessToken }
     }
 
     override suspend fun logout() {
