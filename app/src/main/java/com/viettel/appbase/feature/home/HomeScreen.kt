@@ -45,12 +45,13 @@ private enum class HomeTab(val icon: ImageVector) {
 }
 
 @Composable
-fun HomeScreen(viewModel: HomeViewModel = koinViewModel()) {
+fun HomeScreen(modifier: Modifier = Modifier, viewModel: HomeViewModel = koinViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     var currentTab by rememberSaveable { mutableStateOf(HomeTab.HOME) }
     val stateHolder = rememberSaveableStateHolder()
 
     Scaffold(
+        modifier = modifier,
         bottomBar = {
             NavigationBar {
                 HomeTab.entries.forEach { tab ->
@@ -72,7 +73,9 @@ fun HomeScreen(viewModel: HomeViewModel = koinViewModel()) {
         stateHolder.SaveableStateProvider(currentTab) {
             when (currentTab) {
                 HomeTab.HOME -> DashboardTab(padding)
+
                 HomeTab.EXPLORE -> ExploreTab(padding)
+
                 HomeTab.SETTINGS -> SettingsTab(
                     padding = padding,
                     themeMode = state.themeMode,

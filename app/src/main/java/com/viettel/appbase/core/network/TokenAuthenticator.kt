@@ -12,10 +12,8 @@ import okhttp3.Route
  * Refreshes the access token once on HTTP 401 and retries the request.
  * [tokenRefresher] is lazy to break the OkHttp -> repository -> API -> OkHttp dependency cycle.
  */
-class TokenAuthenticator(
-    private val tokenProvider: TokenProvider,
-    tokenRefresher: Lazy<TokenRefresher>,
-) : Authenticator {
+class TokenAuthenticator(private val tokenProvider: TokenProvider, tokenRefresher: Lazy<TokenRefresher>) :
+    Authenticator {
     private val tokenRefresher by tokenRefresher
     private val lock = Any()
 

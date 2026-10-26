@@ -1,0 +1,33 @@
+# Overrides on top of detekt's default rules (buildUponDefaultConfig = true).
+# Formatting is handled by ktlint, so only code-smell rules are tuned here.
+
+naming:
+  FunctionNaming:
+    # Composables are PascalCase; test names use backticks.
+    ignoreAnnotated: ['Composable']
+    excludes: ['**/test/**', '**/androidTest/**']
+
+performance:
+  SpreadOperator:
+    # Copies a small array; only matters in hot loops, which Android code rarely spreads into.
+    active: false
+
+complexity:
+  LongParameterList:
+    # Composables take many optional parameters by design.
+    ignoreAnnotated: ['Composable']
+    ignoreDefaultParameters: true
+
+style:
+  MagicNumber:
+    ignorePropertyDeclaration: true
+    ignoreCompanionObjectPropertyDeclaration: true
+    ignoreAnnotated: ['Composable']
+    # Design tokens (colors, dp, sp) are numbers by nature.
+    excludes: ['**/test/**', '**/androidTest/**', '**/ui/theme/**']
+  ReturnCount:
+    # Early returns (`?: return`, validation guards) keep functions flat.
+    max: 3
+    excludeGuardClauses: true
+  UnusedPrivateMember:
+    ignoreAnnotated: ['Preview']

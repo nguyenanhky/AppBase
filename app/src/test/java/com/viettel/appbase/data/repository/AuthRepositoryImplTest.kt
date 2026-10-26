@@ -98,10 +98,7 @@ class AuthRepositoryImplTest {
         coVerify(exactly = 1) { userDao.clear() }
     }
 
-    private fun backendSession(
-        displayName: String = "User",
-        accessToken: String = "access",
-    ) = BackendAuthSession(
+    private fun backendSession(displayName: String = "User", accessToken: String = "access") = BackendAuthSession(
         userId = "42",
         email = "user@example.com",
         displayName = displayName,

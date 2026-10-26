@@ -18,11 +18,14 @@ class FirebaseAuthBackend(private val firebaseProvider: FirebaseProvider) : Auth
         user.toSession()
     }
 
-    override suspend fun register(email: String, password: String, displayName: String): BackendAuthSession =
-        firebaseCall {
-            val user = requireNotNull(requireAuth().createUserWithEmailAndPassword(email, password).await().user)
-            user.toSession(displayName)
-        }
+    override suspend fun register(
+        email: String,
+        password: String,
+        displayName: String,
+    ): BackendAuthSession = firebaseCall {
+        val user = requireNotNull(requireAuth().createUserWithEmailAndPassword(email, password).await().user)
+        user.toSession(displayName)
+    }
 
     // Firebase keeps its own refresh token, so the stored one is not needed.
     override suspend fun refresh(refreshToken: String): BackendAuthSession = firebaseCall {

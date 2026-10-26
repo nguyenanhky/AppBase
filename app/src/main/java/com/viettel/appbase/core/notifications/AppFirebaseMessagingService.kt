@@ -24,6 +24,7 @@ class AppFirebaseMessagingService : FirebaseMessagingService() {
     private val appDataStore: AppDataStore by inject()
     private val applicationScope: CoroutineScope by inject()
 
+    @Suppress("OVERRIDE_DEPRECATION") // Firebase marks it deprecated, but it is still the token callback.
     override fun onNewToken(token: String) {
         Timber.d("FCM token refreshed")
         // Also send the token to your backend here once the product targets individual users.
@@ -61,7 +62,8 @@ class AppFirebaseMessagingService : FirebaseMessagingService() {
             .build()
 
         val canNotify = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
-            ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+            ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
+            PackageManager.PERMISSION_GRANTED
         if (canNotify) {
             NotificationManagerCompat.from(this).notify(notificationId, notification)
         } else {

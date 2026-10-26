@@ -4,9 +4,7 @@ import com.viettel.appbase.domain.model.AppError
 import com.viettel.appbase.domain.model.AuthSession
 import com.viettel.appbase.domain.repository.AuthRepository
 
-class RegisterUseCase(
-    private val repository: AuthRepository,
-) {
+class RegisterUseCase(private val repository: AuthRepository) {
     suspend operator fun invoke(
         email: String,
         password: String,

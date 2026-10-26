@@ -45,7 +45,7 @@ fun AppNavHost(
         }
         composable<LoginRoute> {
             LoginScreen(
-                onAuthenticated = {
+                onLoginSuccess = {
                     navController.navigate(HomeRoute) { popUpTo<LoginRoute> { inclusive = true } }
                 },
                 onRegister = { navController.navigate(RegisterRoute) },
@@ -53,7 +53,7 @@ fun AppNavHost(
         }
         composable<RegisterRoute> {
             RegisterScreen(
-                onAuthenticated = {
+                onRegisterSuccess = {
                     navController.navigate(HomeRoute) { popUpTo<LoginRoute> { inclusive = true } }
                 },
                 onBack = navController::popBackStack,

@@ -14,9 +14,9 @@ import androidx.compose.ui.Modifier
 import com.viettel.appbase.ui.theme.LocalAppSpacing
 
 @Composable
-fun EmptyView(message: String) {
+fun EmptyView(message: String, modifier: Modifier = Modifier) {
     Column(
-        modifier = Modifier.fillMaxWidth().padding(LocalAppSpacing.current.large),
+        modifier = modifier.fillMaxWidth().padding(LocalAppSpacing.current.large),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(LocalAppSpacing.current.small),
     ) {

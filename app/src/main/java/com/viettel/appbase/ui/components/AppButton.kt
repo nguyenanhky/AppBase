@@ -8,8 +8,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
-enum class AppButtonStyle { PRIMARY, OUTLINED, TEXT }
-
 @Composable
 fun AppButton(
     text: String,
@@ -24,13 +22,17 @@ fun AppButton(
             modifier = modifier.fillMaxWidth(),
             enabled = enabled,
         ) { Text(text) }
+
         AppButtonStyle.OUTLINED -> OutlinedButton(
             onClick = onClick,
             modifier = modifier.fillMaxWidth(),
             enabled = enabled,
         ) { Text(text) }
+
         AppButtonStyle.TEXT -> TextButton(onClick = onClick, modifier = modifier, enabled = enabled) {
             Text(text)
         }
     }
 }
+
+enum class AppButtonStyle { PRIMARY, OUTLINED, TEXT }

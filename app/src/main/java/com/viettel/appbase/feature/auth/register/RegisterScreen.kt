@@ -25,17 +25,18 @@ import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun RegisterScreen(
-    onAuthenticated: () -> Unit,
+    onRegisterSuccess: () -> Unit,
     onBack: () -> Unit,
+    modifier: Modifier = Modifier,
     viewModel: RegisterViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     ObserveEvents(viewModel.events) { event ->
         when (event) {
-            RegisterEvent.Authenticated -> onAuthenticated()
+            RegisterEvent.Authenticated -> onRegisterSuccess()
         }
     }
-    CenteredScrollColumn {
+    CenteredScrollColumn(modifier) {
         Text(stringResource(R.string.register_title), style = MaterialTheme.typography.headlineLarge)
         Spacer(Modifier.height(LocalAppSpacing.current.large))
         AppTextField(state.displayName, viewModel::onDisplayNameChanged, stringResource(R.string.display_name))

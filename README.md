@@ -24,6 +24,16 @@ Starter project Android production-ready dùng Kotlin, Jetpack Compose, Clean Ar
 
 Debug build có suffix `.debug` nên cài song song được với bản release.
 
+## Chất lượng code
+
+```bash
+./gradlew ktlintFormat          # tự sửa format
+./gradlew ktlintCheck detekt    # CI chạy 2 lệnh này, lỗi là fail build
+```
+
+- **ktlint** (+ bộ luật Compose): format và quy ước Compose. Cấu hình trong `.editorconfig`.
+- **detekt**: code smell (độ phức tạp, bắt exception quá rộng, số "magic"...). Cấu hình trong `config/detekt/detekt.yml`; chỉ tắt luật kèm lý do, và `@Suppress` tại chỗ phải có comment giải thích.
+
 ## Kiến trúc
 
 - `core/`: networking, typed DataStore, Room, DI, logging và notification.
@@ -42,7 +52,7 @@ Token đăng nhập được lưu trong typed DataStore (protobuf), toàn bộ f
 3. Screen đọc `state` bằng `collectAsStateWithLifecycle()`, nhận event bằng `ObserveEvents`, hiển thị lỗi bằng `error.toUserMessage()`.
 4. Route cần đăng nhập không phải làm gì thêm; route công khai thì thêm vào `requiresAuth()` trong `AppRoutes.kt`.
 
-Lỗi đi qua các tầng dưới dạng `AppError`. Gọi Retrofit luôn bọc trong `apiCall {}` để HTTP/IO/parse error được đổi sang `AppError`. Room export schema vào `app/schemas`; khi tăng database version, thêm `Migration` và đăng ký trong `AppDatabase.MIGRATIONS`. Token, FCM token và database được loại khỏi Android cloud backup/device transfer.
+Lỗi đi qua các tầng dưới dạng `AppError`. Gọi Retrofit luôn bọc trong `apiCall {}` để HTTP/IO/parse error được đổi sang `AppError`. Room export schema vào `app/schemas`; khi đổi schema: tăng `AppDatabase.VERSION`, build để sinh file JSON mới, thêm `Migration` vào `AppDatabase.MIGRATIONS` và bổ sung `AppDatabaseMigrationTest` (chạy bằng Robolectric nên CI kiểm tra luôn, không cần emulator). Token, FCM token và database được loại khỏi Android cloud backup/device transfer.
 
 ## Tạo app sản phẩm mới
 

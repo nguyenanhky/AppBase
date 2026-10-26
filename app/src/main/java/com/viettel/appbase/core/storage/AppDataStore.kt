@@ -11,10 +11,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
-class AppDataStore(
-    private val dataStore: DataStore<AppPreferences>,
-    applicationScope: CoroutineScope,
-) : TokenProvider {
+class AppDataStore(private val dataStore: DataStore<AppPreferences>, applicationScope: CoroutineScope) :
+    TokenProvider {
     private val cachedToken = AtomicReference<String?>(null)
 
     val preferences: Flow<AppPreferences> = dataStore.data.catch { exception ->
@@ -34,7 +32,11 @@ class AppDataStore(
 
     suspend fun currentRefreshToken(): String = preferences.first().refreshToken
 
-    suspend fun saveSession(accessToken: String, refreshToken: String, userId: String) {
+    suspend fun saveSession(
+        accessToken: String,
+        refreshToken: String,
+        userId: String,
+    ) {
         cachedToken.set(accessToken)
         dataStore.updateData {
             it.copy(accessToken = accessToken, refreshToken = refreshToken, userId = userId)

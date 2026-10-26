@@ -20,10 +20,7 @@ import com.viettel.appbase.ui.theme.LocalAppSpacing
  * and the keyboard, centers content vertically and scrolls when it does not fit.
  */
 @Composable
-fun CenteredScrollColumn(
-    modifier: Modifier = Modifier,
-    content: @Composable ColumnScope.() -> Unit,
-) {
+fun CenteredScrollColumn(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
     BoxWithConstraints(modifier.fillMaxSize().safeDrawingPadding()) {
         Column(
             modifier = Modifier

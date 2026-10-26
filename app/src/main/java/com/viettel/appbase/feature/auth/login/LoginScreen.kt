@@ -26,18 +26,19 @@ import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun LoginScreen(
-    onAuthenticated: () -> Unit,
+    onLoginSuccess: () -> Unit,
     onRegister: () -> Unit,
+    modifier: Modifier = Modifier,
     viewModel: LoginViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     ObserveEvents(viewModel.events) { event ->
         when (event) {
-            LoginEvent.Authenticated -> onAuthenticated()
+            LoginEvent.Authenticated -> onLoginSuccess()
         }
     }
 
-    CenteredScrollColumn {
+    CenteredScrollColumn(modifier) {
         Text(stringResource(R.string.login_title), style = MaterialTheme.typography.headlineLarge)
         Text(stringResource(R.string.login_subtitle), style = MaterialTheme.typography.bodyLarge)
         Spacer(Modifier.height(LocalAppSpacing.current.large))
@@ -63,7 +64,7 @@ fun LoginScreen(
             Spacer(Modifier.height(LocalAppSpacing.current.small))
             Text(
                 stringResource(R.string.demo_auth_hint),
-                style = MaterialTheme.typography.bodySmall
+                style = MaterialTheme.typography.bodySmall,
             )
         }
         Spacer(Modifier.height(LocalAppSpacing.current.medium))

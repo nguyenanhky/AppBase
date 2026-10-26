@@ -38,18 +38,22 @@ abstract class BaseViewModel<S : Any, E : Any>(initialState: S) : ViewModel() {
     }
 
     /** Launches in [viewModelScope]; any failure is converted to [AppError] and passed to [onError]. */
-    protected fun launchSafely(
-        onError: (AppError) -> Unit = {},
-        block: suspend CoroutineScope.() -> Unit,
-    ): Job = viewModelScope.launch {
-        try {
-            block()
-        } catch (exception: CancellationException) {
-            throw exception
-        } catch (exception: Exception) {
-            val error = exception.asAppError()
-            if (error is AppError.Unknown) Timber.e(exception, "Unexpected error in ${this@BaseViewModel::class.simpleName}")
-            onError(error)
+    @Suppress("TooGenericExceptionCaught") // UI boundary: nothing may crash the screen.
+    protected fun launchSafely(onError: (AppError) -> Unit = {}, block: suspend CoroutineScope.() -> Unit): Job =
+        viewModelScope.launch {
+            try {
+                block()
+            } catch (exception: CancellationException) {
+                throw exception
+            } catch (exception: Exception) {
+                val error = exception.asAppError()
+                if (error is AppError.Unknown) {
+                    Timber.e(
+                        exception,
+                        "Unexpected error in ${this@BaseViewModel::class.simpleName}",
+                    )
+                }
+                onError(error)
+            }
         }
-    }
 }

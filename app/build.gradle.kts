@@ -1,12 +1,14 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.detekt)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.ktlint)
     alias(libs.plugins.room)
 }
-
-import java.util.Properties
 
 val hasGoogleServices = file("google-services.json").exists()
 if (hasGoogleServices) {
@@ -85,7 +87,7 @@ android {
             signingConfig = signingConfigs.findByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
     }
@@ -103,6 +105,12 @@ android {
     }
     testOptions {
         unitTests.isIncludeAndroidResources = true
+        // Robolectric sets FileDescriptor internals through jdk.internal.access on JDK 17+.
+        unitTests.all { it.jvmArgs("--add-exports=java.base/jdk.internal.access=ALL-UNNAMED") }
+    }
+    sourceSets {
+        // Robolectric reads the tested variant's assets: expose Room schemas to debug only (not shipped in release).
+        getByName("debug").assets.directories.add("$projectDir/schemas")
     }
     lint {
         warningsAsErrors = true
@@ -124,6 +132,28 @@ androidComponents {
 
 room {
     schemaDirectory("$projectDir/schemas")
+}
+
+// Formatting + Compose rules. Auto-fix with ./gradlew ktlintFormat; rules live in .editorconfig.
+ktlint {
+    version.set(libs.versions.ktlint)
+    android.set(true)
+}
+
+// Code smells (complexity, exception handling, naming). Rules: config/detekt/detekt.yml.
+detekt {
+    buildUponDefaultConfig = true
+    config.setFrom(rootProject.file("config/detekt/detekt.yml"))
+    source.setFrom("src/main/java", "src/test/java", "src/androidTest/java")
+}
+
+// detekt 1.23 embeds its own Kotlin compiler; keep that version instead of the project's.
+configurations.matching { it.name == "detekt" }.configureEach {
+    resolutionStrategy.eachDependency {
+        if (requested.group == "org.jetbrains.kotlin") {
+            useVersion(io.gitlab.arturbosch.detekt.getSupportedKotlinVersion())
+        }
+    }
 }
 
 dependencies {
@@ -161,13 +191,16 @@ dependencies {
     implementation(libs.retrofit.kotlinx.serialization)
     implementation(libs.timber)
     ksp(libs.androidx.room.compiler)
+    ktlintRuleset(libs.compose.rules.ktlint)
 
     testImplementation(libs.androidx.room.testing)
+    testImplementation(libs.androidx.test.core)
     testImplementation(libs.junit)
     testImplementation(libs.koin.test.junit4)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.mockk)
     testImplementation(libs.okhttp.mockwebserver)
+    testImplementation(libs.robolectric)
     testImplementation(libs.turbine)
 
     androidTestImplementation(platform(libs.androidx.compose.bom))

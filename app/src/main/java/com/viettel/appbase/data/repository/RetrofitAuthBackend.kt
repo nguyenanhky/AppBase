@@ -13,7 +13,11 @@ class RetrofitAuthBackend(private val api: AuthApi) : AuthBackend {
     override suspend fun login(email: String, password: String): BackendAuthSession =
         credentialsCall { api.login(LoginRequestDto(email, password)) }.toSession()
 
-    override suspend fun register(email: String, password: String, displayName: String): BackendAuthSession =
+    override suspend fun register(
+        email: String,
+        password: String,
+        displayName: String,
+    ): BackendAuthSession =
         credentialsCall { api.register(RegisterRequestDto(email, password, displayName)) }.toSession()
 
     override suspend fun refresh(refreshToken: String): BackendAuthSession =
@@ -26,7 +30,7 @@ class RetrofitAuthBackend(private val api: AuthApi) : AuthBackend {
     private inline fun <T> credentialsCall(block: () -> T): T = try {
         apiCall(block)
     } catch (exception: AppError.Unauthorized) {
-        throw AppError.InvalidCredentials(exception.cause)
+        throw AppError.InvalidCredentials(exception)
     }
 
     private fun AuthResponseDto.toSession() = BackendAuthSession(

@@ -16,9 +16,8 @@ sealed interface RegisterEvent {
     data object Authenticated : RegisterEvent
 }
 
-class RegisterViewModel(
-    private val register: RegisterUseCase,
-) : BaseViewModel<RegisterUiState, RegisterEvent>(RegisterUiState()) {
+class RegisterViewModel(private val register: RegisterUseCase) :
+    BaseViewModel<RegisterUiState, RegisterEvent>(RegisterUiState()) {
     fun onDisplayNameChanged(value: String) = updateState { copy(displayName = value, error = null) }
     fun onEmailChanged(value: String) = updateState { copy(email = value, error = null) }
     fun onPasswordChanged(value: String) = updateState { copy(password = value, error = null) }

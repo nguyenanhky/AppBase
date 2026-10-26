@@ -15,9 +15,14 @@ import androidx.compose.ui.Modifier
 import com.viettel.appbase.ui.theme.LocalAppSpacing
 
 @Composable
-fun ErrorView(message: String, retryLabel: String, onRetry: (() -> Unit)? = null) {
+fun ErrorView(
+    message: String,
+    retryLabel: String,
+    modifier: Modifier = Modifier,
+    onRetry: (() -> Unit)? = null,
+) {
     Column(
-        modifier = Modifier.fillMaxWidth().padding(LocalAppSpacing.current.large),
+        modifier = modifier.fillMaxWidth().padding(LocalAppSpacing.current.large),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(LocalAppSpacing.current.medium),
     ) {
