@@ -11,6 +11,7 @@ coroutines = "1.10.2"
 composeRules = "0.6.8"
 crashlyticsPlugin = "3.0.8"
 datastore = "1.2.1"
+exifinterface = "1.4.2"
 detekt = "1.23.8"
 firebaseBom = "34.18.0"
 googleServices = "4.5.0"
@@ -53,6 +54,7 @@ androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = 
 androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "coreSplashscreen" }
 androidx-datastore = { group = "androidx.datastore", name = "datastore", version.ref = "datastore" }
 androidx-test-core = { group = "androidx.test", name = "core-ktx", version.ref = "androidxTestCore" }
+androidx-exifinterface = { group = "androidx.exifinterface", name = "exifinterface", version.ref = "exifinterface" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycle" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle" }
@@ -68,6 +70,8 @@ billing = { group = "com.android.billingclient", name = "billing", version.ref =
 coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
 coil-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
 firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
+firebase-appcheck-debug = { group = "com.google.firebase", name = "firebase-appcheck-debug" }
+firebase-appcheck-playintegrity = { group = "com.google.firebase", name = "firebase-appcheck-playintegrity" }
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
 firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics" }

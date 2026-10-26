@@ -100,6 +100,28 @@ Code nằm trong `core/monetization/`. **Mặc định tắt** (`ads.enabled=fal
 
 Lưu ý: SDK AdMob vẫn nằm trong APK kể cả khi tắt (manifest luôn cần App ID, nếu không app crash khi khởi động). App chắc chắn không bao giờ dùng quảng cáo có thể xoá các dependency `admob`, `ump`, `billing`, thẻ `meta-data` App ID trong manifest, thư mục `core/monetization/`, `MonetizationModule` và các chỗ gọi (`MonetizationInitializer` trong `MainActivity`, banner/xen kẽ/`MonetizationSettings` ở màn Home).
 
+## AI (ảnh → phân tích → kết quả)
+
+App **không chứa API key AI** và **không gửi prompt**: app gửi *tên task* + ảnh tới Cloudflare Worker của bạn; Worker giữ key Gemini, prompt, JSON schema và quota. Code: `core/ai/`, `core/image/`, màn demo `feature/scan/` (tab "Quét AI").
+
+- **Flavor `mock`**: `FakeAiClient` trả kết quả mẫu theo task và giả lập quota 5 lượt/ngày, chạy offline, không tốn tiền.
+- **`dev` / `prod`**: `WorkerAiClient` gọi `ai.workerUrl` (đặt trong `gradle.properties`). Mỗi request kèm Firebase ID token (`Authorization: Bearer`) và App Check token (`X-Firebase-AppCheck`); 401 tự refresh token.
+- **App Check**: debug build dùng debug provider (lấy token trong logcat, đăng ký ở Firebase Console > App Check); release dùng Play Integrity. Bật *enforcement* trên Worker khi phát hành.
+- **Ảnh**: `rememberImagePicker()` (Photo Picker + camera hệ thống, **không xin quyền**; đừng khai báo quyền CAMERA). `ImagePreprocessor` xoay đúng chiều, thu về cạnh dài 1024px, JPEG 85, **xoá EXIF/GPS**.
+- **Lịch sử**: `AiHistoryRepository` (Room, bảng `ai_history`, lưu kết quả JSON + ảnh thu nhỏ).
+
+**Thêm một task AI cho app mới**: (1) data class `@Serializable` khớp schema; (2) mẫu JSON vào `FakeAiClient` trong `AiModule`; (3) gọi `aiClient.run("ten_task", AiInput(images), Result.serializer())`; (4) thêm task (prompt + schema + model) ở Worker.
+
+**Hợp đồng API v1 (app ↔ Worker)**
+
+| Endpoint | Request | Response |
+|---|---|---|
+| `POST /v1/run` | `{ task, locale, text?, images: [{ mimeType, data(base64) }] }` | `200 { result: {...theo schema}, quota?: { remaining, limit, resetAt? } }` |
+| `POST /v1/report` | `{ task, result, reason }` | `2xx` |
+| Lỗi | | `401` token hết hạn/sai · `429` hoặc `{ error: "quota_exceeded", resetAt? }` · `422 { error: "content_blocked" }` · khác → lỗi server |
+
+Google Play yêu cầu app có nội dung do AI tạo phải cho người dùng **báo cáo** nội dung (nút "Báo cáo kết quả này" → `/v1/report`). Dùng gói Gemini trả phí khi gửi ảnh người dùng và ghi rõ trong privacy policy / Data safety.
+
 ## Release Google Play
 
 ```bash

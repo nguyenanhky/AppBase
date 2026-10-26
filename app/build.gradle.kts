@@ -31,6 +31,9 @@ val testBannerId = "ca-app-pub-3940256099942544/9214589741"
 val testInterstitialId = "ca-app-pub-3940256099942544/1033173712"
 fun adMobValue(key: String, fallback: String): String = providers.gradleProperty(key).orNull ?: fallback
 
+// AI: requests go to your Cloudflare Worker (see README "AI"). Set ai.workerUrl in gradle.properties.
+val aiWorkerUrl = providers.gradleProperty("ai.workerUrl").orNull ?: "https://ai.example.com/"
+
 android {
     namespace = "com.viettel.appbase"
     compileSdk {
@@ -53,6 +56,7 @@ android {
         buildConfigField("String", "PLAY_STORE_PACKAGE", "\"$applicationId\"")
 
         buildConfigField("Boolean", "ADS_ENABLED", adsEnabled.toString())
+        buildConfigField("String", "AI_BASE_URL", "\"$aiWorkerUrl\"")
         buildConfigField(
             "String",
             "REMOVE_ADS_PRODUCT_ID",
@@ -70,16 +74,19 @@ android {
         create("mock") {
             dimension = "environment"
             buildConfigField("Boolean", "USE_FAKE_AUTH", "true")
+            buildConfigField("Boolean", "USE_FAKE_AI", "true")
             buildConfigField("String", "BASE_URL", "\"https://dev.example.com/api/\"")
         }
         create("dev") {
             dimension = "environment"
             buildConfigField("Boolean", "USE_FAKE_AUTH", "false")
+            buildConfigField("Boolean", "USE_FAKE_AI", "false")
             buildConfigField("String", "BASE_URL", "\"https://dev.example.com/api/\"")
         }
         create("prod") {
             dimension = "environment"
             buildConfigField("Boolean", "USE_FAKE_AUTH", "false")
+            buildConfigField("Boolean", "USE_FAKE_AI", "false")
             buildConfigField("String", "BASE_URL", "\"https://example.com/api/\"")
             manifestPlaceholders["adMobAppId"] = adMobValue("admob.appId", testAdMobAppId)
             buildConfigField("String", "ADMOB_BANNER_ID", "\"${adMobValue("admob.bannerId", testBannerId)}\"")
@@ -176,7 +183,7 @@ ktlint {
 detekt {
     buildUponDefaultConfig = true
     config.setFrom(rootProject.file("config/detekt/detekt.yml"))
-    source.setFrom("src/main/java", "src/test/java", "src/androidTest/java")
+    source.setFrom("src/main/java", "src/debug/java", "src/release/java", "src/test/java", "src/androidTest/java")
 }
 
 // detekt 1.23 embeds its own Kotlin compiler; keep that version instead of the project's.
@@ -193,9 +200,10 @@ dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(platform(libs.firebase.bom))
 
-    // AndroidX core: KTX extensions, system splash screen
+    // AndroidX core: KTX extensions, system splash screen, EXIF (photo orientation)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.core.splashscreen)
+    implementation(libs.androidx.exifinterface)
 
     // Jetpack Compose UI + Material 3
     implementation(libs.androidx.activity.compose)
@@ -234,8 +242,10 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     ksp(libs.androidx.room.compiler)
 
-    // Firebase: analytics, auth, crash reporting, push
+    // Firebase: analytics, auth, crash reporting, push, App Check (Play Integrity; debug provider in debug builds)
     implementation(libs.firebase.analytics)
+    implementation(libs.firebase.appcheck.playintegrity)
+    debugImplementation(libs.firebase.appcheck.debug)
     implementation(libs.firebase.auth)
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.messaging)

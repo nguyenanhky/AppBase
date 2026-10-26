@@ -14,12 +14,9 @@
     <string name="back_to_login">Quay lại đăng nhập</string>
     <string name="demo_auth_hint">Bản debug dùng đăng nhập demo cục bộ. Nhập email hợp lệ và mật khẩu có ít nhất 6 ký tự.</string>
     <string name="tab_home">Trang chủ</string>
-    <string name="tab_explore">Khám phá</string>
     <string name="tab_settings">Cài đặt</string>
     <string name="home_title">AppBase đã sẵn sàng</string>
     <string name="home_description">Dùng màn hình này làm điểm bắt đầu cho tính năng sản phẩm đầu tiên.</string>
-    <string name="explore_title">Khám phá</string>
-    <string name="explore_description">Màn hình mẫu minh họa trạng thái bottom navigation được giữ lại.</string>
     <string name="settings_title">Cài đặt</string>
     <string name="theme_title">Giao diện</string>
     <string name="theme_system">Theo hệ thống</string>
@@ -54,4 +51,22 @@
     <string name="purchase_pending">Giao dịch đang được xử lý. Quảng cáo sẽ được gỡ khi thanh toán hoàn tất.</string>
     <string name="restore_purchases">Khôi phục giao dịch</string>
     <string name="privacy_options">Tuỳ chọn quyền riêng tư</string>
+    <string name="tab_scan">Quét AI</string>
+    <string name="scan_title">Quét ảnh bằng AI</string>
+    <string name="scan_disclaimer">Kết quả do AI tạo và có thể sai. Hãy hỏi ý kiến chuyên gia trước khi làm theo.</string>
+    <string name="scan_take_photo">Chụp ảnh</string>
+    <string name="scan_pick_photo">Chọn ảnh</string>
+    <string name="scan_analyzing">Đang phân tích…</string>
+    <string name="scan_not_recognized">Không nhận diện được ảnh này</string>
+    <string name="scan_confidence">Độ tin cậy: %1$d%%</string>
+    <string name="scan_advice_title">Lời khuyên</string>
+    <string name="scan_report">Báo cáo kết quả này</string>
+    <string name="scan_reported">Cảm ơn, báo cáo của bạn đã được gửi.</string>
+    <string name="scan_history_title">Lượt quét gần đây</string>
+    <string name="error_quota_exceeded">Bạn đã dùng hết lượt quét miễn phí hôm nay. Hãy quay lại vào ngày mai.</string>
+    <string name="error_content_blocked">Nội dung này không thể phân tích. Hãy thử ảnh khác.</string>
+    <string name="error_invalid_image">Không đọc được ảnh. Hãy chọn ảnh khác.</string>
+    <plurals name="ai_quota_remaining">
+        <item quantity="other">Còn %1$d lượt quét miễn phí hôm nay</item>
+    </plurals>
 </resources>

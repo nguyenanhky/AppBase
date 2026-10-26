@@ -42,6 +42,7 @@ import com.viettel.appbase.core.monetization.ads.rememberInterstitialAd
 import com.viettel.appbase.core.playstore.openPlayStoreListing
 import com.viettel.appbase.core.playstore.rememberInAppReview
 import com.viettel.appbase.core.storage.ThemeMode
+import com.viettel.appbase.feature.scan.ScanScreen
 import com.viettel.appbase.ui.components.AppButton
 import com.viettel.appbase.ui.components.AppButtonStyle
 import com.viettel.appbase.ui.components.LoadingDialog
@@ -50,7 +51,7 @@ import org.koin.androidx.compose.koinViewModel
 
 private enum class HomeTab(val icon: ImageVector) {
     HOME(Icons.Default.Home),
-    EXPLORE(Icons.Default.Search),
+    SCAN(Icons.Default.Search),
     SETTINGS(Icons.Default.Settings),
 }
 
@@ -76,7 +77,7 @@ fun HomeScreen(modifier: Modifier = Modifier, viewModel: HomeViewModel = koinVie
                     HomeTab.entries.forEach { tab ->
                         val label = when (tab) {
                             HomeTab.HOME -> stringResource(R.string.tab_home)
-                            HomeTab.EXPLORE -> stringResource(R.string.tab_explore)
+                            HomeTab.SCAN -> stringResource(R.string.tab_scan)
                             HomeTab.SETTINGS -> stringResource(R.string.tab_settings)
                         }
                         NavigationBarItem(
@@ -97,7 +98,7 @@ fun HomeScreen(modifier: Modifier = Modifier, viewModel: HomeViewModel = koinVie
             when (currentTab) {
                 HomeTab.HOME -> DashboardTab(padding)
 
-                HomeTab.EXPLORE -> ExploreTab(padding)
+                HomeTab.SCAN -> ScanScreen(Modifier.padding(padding))
 
                 HomeTab.SETTINGS -> SettingsTab(
                     padding = padding,
@@ -126,14 +127,6 @@ private fun DashboardTab(padding: PaddingValues) {
             ),
             style = MaterialTheme.typography.bodySmall,
         )
-    }
-}
-
-@Composable
-private fun ExploreTab(padding: PaddingValues) {
-    TabContainer(padding) {
-        Text(stringResource(R.string.explore_title), style = MaterialTheme.typography.headlineLarge)
-        Text(stringResource(R.string.explore_description))
     }
 }
 

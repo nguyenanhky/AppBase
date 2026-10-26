@@ -23,6 +23,7 @@ class AppApplication : Application() {
             modules(appModules)
         }
         val firebaseProvider = koinApplication.koin.get<FirebaseProvider>()
+        firebaseProvider.installAppCheck()
         // Debug crashes stay out of the Crashlytics dashboard.
         firebaseProvider.crashlyticsOrNull()?.setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG)
         if (BuildConfig.DEBUG) {

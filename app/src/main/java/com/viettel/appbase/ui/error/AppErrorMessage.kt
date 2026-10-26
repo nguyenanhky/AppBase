@@ -17,5 +17,8 @@ fun AppError.toUserMessage(): String = when (this) {
     is AppError.Network -> stringResource(R.string.error_network)
     is AppError.Unauthorized -> stringResource(R.string.error_session_expired)
     is AppError.Server -> stringResource(R.string.error_server)
+    is AppError.QuotaExceeded -> stringResource(R.string.error_quota_exceeded)
+    is AppError.ContentBlocked -> stringResource(R.string.error_content_blocked)
+    is AppError.InvalidImage -> stringResource(R.string.error_invalid_image)
     is AppError.Unknown -> stringResource(R.string.error_unknown)
 }

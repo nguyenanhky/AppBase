@@ -1,7 +1,10 @@
 package com.viettel.appbase.core.di
 
 import com.viettel.appbase.BuildConfig
+import com.viettel.appbase.core.firebase.FirebaseAppCheckTokenProvider
 import com.viettel.appbase.core.network.ApiClient
+import com.viettel.appbase.core.network.AppCheckInterceptor
+import com.viettel.appbase.core.network.AppCheckTokenProvider
 import com.viettel.appbase.core.network.AuthInterceptor
 import com.viettel.appbase.core.network.LoggingInterceptor
 import com.viettel.appbase.core.network.TokenAuthenticator
@@ -23,6 +26,8 @@ val networkModule = module {
         }
     }
     single { AuthInterceptor(get<TokenProvider>()) }
+    single<AppCheckTokenProvider> { FirebaseAppCheckTokenProvider(get()) }
+    single { AppCheckInterceptor(get()) }
     single { TokenAuthenticator(get<TokenProvider>(), lazy { get<TokenRefresher>() }) }
     single { LoggingInterceptor(BuildConfig.DEBUG) }
     single {
@@ -31,6 +36,7 @@ val networkModule = module {
             .readTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)
             .addInterceptor(get<AuthInterceptor>())
+            .addInterceptor(get<AppCheckInterceptor>())
             .addInterceptor(get<LoggingInterceptor>())
             .authenticator(get<TokenAuthenticator>())
             .build()
