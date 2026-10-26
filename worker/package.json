@@ -1,0 +1,23 @@
+{
+  "name": "appbase-ai-worker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev --env dev",
+    "deploy:dev": "wrangler deploy --env dev",
+    "deploy:prod": "wrangler deploy --env prod",
+    "types": "wrangler types",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@cfworker/json-schema": "4.1.1",
+    "jose": "6.2.13"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-plugin": "1.4.7",
+    "typescript": "5.9.3",
+    "vitest": "5.0.5",
+    "wrangler": "4.152.0"
+  }
+}

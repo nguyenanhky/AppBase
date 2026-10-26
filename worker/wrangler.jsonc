@@ -1,0 +1,60 @@
+{
+  // AI backend for the app: verifies Firebase ID + App Check tokens, enforces per-user daily quota,
+  // calls Gemini with server-side prompts. One deployment per app environment (dev / prod).
+  // Bindings and vars are NOT inherited by environments, so each env lists them in full.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "appbase-ai",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-01",
+  "observability": { "enabled": true },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["QuotaCounter"] }],
+  "env": {
+    "dev": {
+      "name": "appbase-ai-dev",
+      "durable_objects": { "bindings": [{ "name": "QUOTA", "class_name": "QuotaCounter" }] },
+      "d1_databases": [
+        {
+          "binding": "REPORTS",
+          "database_name": "appbase-ai-reports-dev",
+          "database_id": "REPLACE_WITH_DEV_D1_ID",
+          "migrations_dir": "migrations"
+        }
+      ],
+      "vars": {
+        "FIREBASE_PROJECT_ID": "your-dev-project-id",
+        "FIREBASE_PROJECT_NUMBER": "000000000000",
+        "ALLOWED_APP_IDS": "1:000000000000:android:0000000000000000",
+        // "monitor" logs App Check failures but lets requests through: use while wiring things up.
+        "APP_CHECK_MODE": "monitor",
+        "ENABLED_TASKS": "identify_object",
+        "DAILY_LIMIT": "5",
+        "REPORT_DAILY_LIMIT": "20",
+        "QUOTA_UTC_OFFSET_MINUTES": "420",
+        "GEMINI_BASE_URL": "https://generativelanguage.googleapis.com"
+      }
+    },
+    "prod": {
+      "name": "appbase-ai",
+      "durable_objects": { "bindings": [{ "name": "QUOTA", "class_name": "QuotaCounter" }] },
+      "d1_databases": [
+        {
+          "binding": "REPORTS",
+          "database_name": "appbase-ai-reports",
+          "database_id": "REPLACE_WITH_PROD_D1_ID",
+          "migrations_dir": "migrations"
+        }
+      ],
+      "vars": {
+        "FIREBASE_PROJECT_ID": "your-prod-project-id",
+        "FIREBASE_PROJECT_NUMBER": "000000000000",
+        "ALLOWED_APP_IDS": "1:000000000000:android:0000000000000000",
+        "APP_CHECK_MODE": "enforce",
+        "ENABLED_TASKS": "identify_object",
+        "DAILY_LIMIT": "5",
+        "REPORT_DAILY_LIMIT": "20",
+        "QUOTA_UTC_OFFSET_MINUTES": "420",
+        "GEMINI_BASE_URL": "https://generativelanguage.googleapis.com"
+      }
+    }
+  }
+}
