@@ -68,4 +68,8 @@ class AppDataStore(private val dataStore: DataStore<AppPreferences>, application
     suspend fun markReviewPrompted(nowEpochMillis: Long) {
         dataStore.updateData { it.copy(lastReviewPromptEpochMillis = nowEpochMillis) }
     }
+
+    suspend fun setAdFree(adFree: Boolean) {
+        dataStore.updateData { it.copy(adFree = adFree) }
+    }
 }

@@ -81,6 +81,25 @@ Code nằm trong `core/playstore/`. Cả hai chỉ hoạt động khi app đư�
 - **In-App Update**: `InAppUpdateHandler` ở gốc app kiểm tra mỗi lần app trở lại foreground. Priority ≥ 4 → bắt buộc cập nhật (immediate); priority ≥ 2 hoặc bản mới đã ra ≥ 3 ngày → cập nhật nền (flexible), tải xong thì hỏi khởi động lại. Priority đặt cho từng bản phát hành qua Play Developer API (`inAppUpdatePriority`); Play Console không có ô nhập priority.
 - **Thử trên máy thật**: upload 2 bản (versionCode khác nhau) lên *Internal app sharing* hoặc track *Internal testing*, cài bản thấp từ link Play rồi mở app.
 
+## Kiếm tiền: quảng cáo + gói "Gỡ quảng cáo"
+
+Code nằm trong `core/monetization/`. **Mặc định tắt** (`ads.enabled=false` trong `gradle.properties`).
+
+**Bật cho một app:**
+1. Đặt `ads.enabled=true` trong `gradle.properties`.
+2. Tạo app trên AdMob, điền `admob.appId`, `admob.bannerId`, `admob.interstitialId` (chỉ `prodRelease` dùng ID thật; mọi bản debug luôn dùng ID test của Google để tránh bị khoá tài khoản vì tự click).
+3. Trong AdMob > *Privacy & messaging*: tạo thông điệp GDPR (và US states nếu cần). Không có thông điệp thì form đồng ý không hiện.
+4. Trong Play Console: tạo sản phẩm mua một lần ID `remove_ads` (đổi bằng `billing.removeAdsProductId`), thêm tài khoản *License testing* để mua thử không mất tiền.
+5. Thêm `app-ads.txt` lên website ghi trong trang Play Store.
+
+**Luồng khởi động** (`MonetizationInitializer` ở gốc app): khôi phục giao dịch → nếu đã mua "Gỡ quảng cáo" thì dừng → xin đồng ý (UMP) → khởi tạo Mobile Ads SDK → tải sẵn quảng cáo xen kẽ.
+
+- **Banner**: `AppBannerAd()` (adaptive, tự ẩn khi không được phép hiện).
+- **Xen kẽ**: `rememberInterstitialAd()`; gọi ở điểm dừng tự nhiên. `FrequencyCap` chặn quá 1 quảng cáo / 3 phút, kể cả 3 phút đầu sau khi mở app.
+- **Gỡ quảng cáo**: `BillingController` xác nhận (acknowledge) giao dịch, khôi phục khi cài lại, xử lý giao dịch chờ thanh toán và thu hồi khi bị hoàn tiền. Trạng thái được lưu nên offline vẫn không hiện quảng cáo. Xác minh phía client — đủ cho món rẻ mua một lần; bán thứ giá trị cao thì cần xác minh trên server.
+
+Lưu ý: SDK AdMob vẫn nằm trong APK kể cả khi tắt (manifest luôn cần App ID, nếu không app crash khi khởi động). App chắc chắn không bao giờ dùng quảng cáo có thể xoá các dependency `admob`, `ump`, `billing`, thẻ `meta-data` App ID trong manifest, thư mục `core/monetization/`, `MonetizationModule` và các chỗ gọi (`MonetizationInitializer` trong `MainActivity`, banner/xen kẽ/`MonetizationSettings` ở màn Home).
+
 ## Release Google Play
 
 ```bash

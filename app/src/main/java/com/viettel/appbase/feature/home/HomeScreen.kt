@@ -2,6 +2,7 @@ package com.viettel.appbase.feature.home
 
 import android.Manifest
 import android.os.Build
+import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -9,6 +10,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Search
@@ -34,6 +37,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.viettel.appbase.BuildConfig
 import com.viettel.appbase.R
+import com.viettel.appbase.core.monetization.ads.AppBannerAd
+import com.viettel.appbase.core.monetization.ads.rememberInterstitialAd
 import com.viettel.appbase.core.playstore.openPlayStoreListing
 import com.viettel.appbase.core.playstore.rememberInAppReview
 import com.viettel.appbase.core.storage.ThemeMode
@@ -58,23 +63,32 @@ fun HomeScreen(modifier: Modifier = Modifier, viewModel: HomeViewModel = koinVie
     // Demo trigger: ReviewPolicy only lets it through for engaged users. In a real app,
     // call requestReview() right after a positive moment instead (task done, goal reached...).
     LaunchedEffect(Unit) { requestReview() }
+    val activity = LocalActivity.current
+    // Demo placement: an interstitial at a tab switch, throttled by FrequencyCap. Prefer real breaks in your app.
+    val showInterstitial = rememberInterstitialAd()
 
     Scaffold(
         modifier = modifier,
         bottomBar = {
-            NavigationBar {
-                HomeTab.entries.forEach { tab ->
-                    val label = when (tab) {
-                        HomeTab.HOME -> stringResource(R.string.tab_home)
-                        HomeTab.EXPLORE -> stringResource(R.string.tab_explore)
-                        HomeTab.SETTINGS -> stringResource(R.string.tab_settings)
+            Column {
+                AppBannerAd()
+                NavigationBar {
+                    HomeTab.entries.forEach { tab ->
+                        val label = when (tab) {
+                            HomeTab.HOME -> stringResource(R.string.tab_home)
+                            HomeTab.EXPLORE -> stringResource(R.string.tab_explore)
+                            HomeTab.SETTINGS -> stringResource(R.string.tab_settings)
+                        }
+                        NavigationBarItem(
+                            selected = currentTab == tab,
+                            onClick = {
+                                if (currentTab != tab) showInterstitial()
+                                currentTab = tab
+                            },
+                            icon = { Icon(tab.icon, contentDescription = label) },
+                            label = { Text(label) },
+                        )
                     }
-                    NavigationBarItem(
-                        selected = currentTab == tab,
-                        onClick = { currentTab = tab },
-                        icon = { Icon(tab.icon, contentDescription = label) },
-                        label = { Text(label) },
-                    )
                 }
             }
         },
@@ -90,6 +104,10 @@ fun HomeScreen(modifier: Modifier = Modifier, viewModel: HomeViewModel = koinVie
                     themeMode = state.themeMode,
                     onThemeModeChange = viewModel::setThemeMode,
                     onLogout = viewModel::logout,
+                    monetization = state.monetization,
+                    onRemoveAds = { activity?.let(viewModel::removeAds) },
+                    onRestorePurchases = viewModel::restorePurchases,
+                    onPrivacyOptions = { activity?.let(viewModel::openPrivacyOptions) },
                 )
             }
         }
@@ -125,6 +143,10 @@ private fun SettingsTab(
     themeMode: ThemeMode,
     onThemeModeChange: (ThemeMode) -> Unit,
     onLogout: () -> Unit,
+    monetization: MonetizationUiState,
+    onRemoveAds: () -> Unit,
+    onRestorePurchases: () -> Unit,
+    onPrivacyOptions: () -> Unit,
 ) {
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission(),
@@ -148,6 +170,12 @@ private fun SettingsTab(
                 notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             })
         }
+        MonetizationSettings(
+            state = monetization,
+            onRemoveAds = onRemoveAds,
+            onRestorePurchases = onRestorePurchases,
+            onPrivacyOptions = onPrivacyOptions,
+        )
         val context = LocalContext.current
         AppButton(
             text = stringResource(R.string.rate_app),
@@ -161,7 +189,11 @@ private fun SettingsTab(
 @Composable
 private fun TabContainer(padding: PaddingValues, content: @Composable () -> Unit) {
     Column(
-        modifier = Modifier.fillMaxSize().padding(padding).padding(LocalAppSpacing.current.large),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(padding)
+            .verticalScroll(rememberScrollState())
+            .padding(LocalAppSpacing.current.large),
         verticalArrangement = Arrangement.spacedBy(LocalAppSpacing.current.medium),
         horizontalAlignment = Alignment.Start,
     ) { content() }

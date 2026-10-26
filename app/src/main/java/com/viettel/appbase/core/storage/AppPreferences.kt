@@ -13,6 +13,7 @@ data class AppPreferences(
     val launchCount: Int = 0,
     val firstLaunchEpochMillis: Long = 0,
     val lastReviewPromptEpochMillis: Long = 0,
+    val adFree: Boolean = false,
 )
 
 @Serializable

@@ -1,6 +1,7 @@
 package com.viettel.appbase.core.di
 
 import android.content.Context
+import kotlin.time.Duration
 import okhttp3.OkHttpClient
 import org.junit.Test
 import org.koin.core.annotation.KoinExperimentalAPI
@@ -22,6 +23,9 @@ class KoinModulesTest {
                 Boolean::class,
                 Lazy::class,
                 OkHttpClient.Builder::class,
+                // MonetizationConfig is built from BuildConfig, not resolved.
+                String::class,
+                Duration::class,
             ),
         )
     }

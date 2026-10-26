@@ -48,4 +48,11 @@
     <string name="update_ready_message">A new version has been downloaded. Restart the app to finish updating.</string>
     <string name="update_restart">Restart</string>
     <string name="update_later">Later</string>
+    <string name="ads_title">Ads</string>
+    <string name="remove_ads">Remove ads</string>
+    <string name="remove_ads_price">Remove ads · %1$s</string>
+    <string name="ad_free_active">Ads removed. Thank you for your support!</string>
+    <string name="purchase_pending">Your purchase is being processed. Ads will be removed once payment completes.</string>
+    <string name="restore_purchases">Restore purchases</string>
+    <string name="privacy_options">Privacy options</string>
 </resources>

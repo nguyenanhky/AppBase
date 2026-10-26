@@ -23,6 +23,14 @@ val keystoreProperties = Properties().apply {
 }
 fun signingValue(key: String, env: String): String? = keystoreProperties.getProperty(key) ?: System.getenv(env)
 
+// Monetization (AdMob + "remove ads" purchase). Off by default; enable per app with ads.enabled=true in
+// gradle.properties. Google's test IDs are used everywhere except prodRelease, which reads the real ones.
+val adsEnabled = providers.gradleProperty("ads.enabled").orNull?.toBoolean() ?: false
+val testAdMobAppId = "ca-app-pub-3940256099942544~3347511713"
+val testBannerId = "ca-app-pub-3940256099942544/9214589741"
+val testInterstitialId = "ca-app-pub-3940256099942544/1033173712"
+fun adMobValue(key: String, fallback: String): String = providers.gradleProperty(key).orNull ?: fallback
+
 android {
     namespace = "com.viettel.appbase"
     compileSdk {
@@ -43,6 +51,17 @@ android {
         buildConfigField("Boolean", "FIREBASE_CONFIGURED", hasGoogleServices.toString())
         // Store listing id: without the .debug suffix, so "Rate app" always opens the real listing.
         buildConfigField("String", "PLAY_STORE_PACKAGE", "\"$applicationId\"")
+
+        buildConfigField("Boolean", "ADS_ENABLED", adsEnabled.toString())
+        buildConfigField(
+            "String",
+            "REMOVE_ADS_PRODUCT_ID",
+            "\"${adMobValue("billing.removeAdsProductId", "remove_ads")}\"",
+        )
+        // The AdMob SDK crashes at startup without an app id, so one is always set (test id unless prodRelease).
+        manifestPlaceholders["adMobAppId"] = testAdMobAppId
+        buildConfigField("String", "ADMOB_BANNER_ID", "\"$testBannerId\"")
+        buildConfigField("String", "ADMOB_INTERSTITIAL_ID", "\"$testInterstitialId\"")
     }
 
     flavorDimensions += "environment"
@@ -62,6 +81,13 @@ android {
             dimension = "environment"
             buildConfigField("Boolean", "USE_FAKE_AUTH", "false")
             buildConfigField("String", "BASE_URL", "\"https://example.com/api/\"")
+            manifestPlaceholders["adMobAppId"] = adMobValue("admob.appId", testAdMobAppId)
+            buildConfigField("String", "ADMOB_BANNER_ID", "\"${adMobValue("admob.bannerId", testBannerId)}\"")
+            buildConfigField(
+                "String",
+                "ADMOB_INTERSTITIAL_ID",
+                "\"${adMobValue("admob.interstitialId", testInterstitialId)}\"",
+            )
         }
     }
 
@@ -81,6 +107,10 @@ android {
         debug {
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-debug"
+            // Never serve real ads to debug builds: clicks on your own ads can get the AdMob account banned.
+            manifestPlaceholders["adMobAppId"] = testAdMobAppId
+            buildConfigField("String", "ADMOB_BANNER_ID", "\"$testBannerId\"")
+            buildConfigField("String", "ADMOB_INTERSTITIAL_ID", "\"$testInterstitialId\"")
             enableUnitTestCoverage = true
         }
         release {
@@ -161,6 +191,7 @@ configurations.matching { it.name == "detekt" }.configureEach {
 dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(platform(libs.firebase.bom))
+    implementation(libs.admob)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material.icons)
     implementation(libs.androidx.compose.material3)
@@ -176,6 +207,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.room.runtime)
+    implementation(libs.billing)
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
     implementation(libs.firebase.analytics)
@@ -194,6 +226,7 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.retrofit.kotlinx.serialization)
     implementation(libs.timber)
+    implementation(libs.ump)
     ksp(libs.androidx.room.compiler)
     ktlintRuleset(libs.compose.rules.ktlint)
 

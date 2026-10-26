@@ -47,4 +47,11 @@
     <string name="update_ready_message">Phiên bản mới đã tải xong. Khởi động lại ứng dụng để hoàn tất cập nhật.</string>
     <string name="update_restart">Khởi động lại</string>
     <string name="update_later">Để sau</string>
+    <string name="ads_title">Quảng cáo</string>
+    <string name="remove_ads">Gỡ quảng cáo</string>
+    <string name="remove_ads_price">Gỡ quảng cáo · %1$s</string>
+    <string name="ad_free_active">Đã gỡ quảng cáo. Cảm ơn bạn đã ủng hộ!</string>
+    <string name="purchase_pending">Giao dịch đang được xử lý. Quảng cáo sẽ được gỡ khi thanh toán hoàn tất.</string>
+    <string name="restore_purchases">Khôi phục giao dịch</string>
+    <string name="privacy_options">Tuỳ chọn quyền riêng tư</string>
 </resources>

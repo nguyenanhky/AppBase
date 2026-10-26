@@ -13,6 +13,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.util.Consumer
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
+import com.viettel.appbase.core.monetization.ads.MonetizationInitializer
 import com.viettel.appbase.core.playstore.InAppUpdateHandler
 import com.viettel.appbase.core.storage.ThemeMode
 import com.viettel.appbase.navigation.AppNavHost
@@ -50,5 +51,6 @@ private fun AppRoot(activity: ComponentActivity, viewModel: MainViewModel) {
     AppTheme(darkTheme = darkTheme) {
         AppNavHost(navController, isAuthenticated = state.isAuthenticated)
         InAppUpdateHandler()
+        MonetizationInitializer()
     }
 }
