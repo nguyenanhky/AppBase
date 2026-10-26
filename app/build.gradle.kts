@@ -189,47 +189,77 @@ configurations.matching { it.name == "detekt" }.configureEach {
 }
 
 dependencies {
+    // BOMs: pin versions for the Compose and Firebase artifacts below
     implementation(platform(libs.androidx.compose.bom))
     implementation(platform(libs.firebase.bom))
-    implementation(libs.admob)
+
+    // AndroidX core: KTX extensions, system splash screen
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.core.splashscreen)
+
+    // Jetpack Compose UI + Material 3
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material.icons)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.core.splashscreen)
-    implementation(libs.androidx.datastore)
+
+    // Lifecycle + ViewModel
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
+
+    // Navigation (type-safe routes)
     implementation(libs.androidx.navigation.compose)
+
+    // Dependency injection (Koin)
+    implementation(libs.koin.android)
+    implementation(libs.koin.androidx.compose)
+
+    // Networking: Retrofit + OkHttp
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.logging)
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.kotlinx.serialization)
+
+    // Serialization (JSON for APIs, ProtoBuf for DataStore) + coroutines await() for Play/Firebase tasks
+    implementation(libs.kotlinx.coroutines.play.services)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kotlinx.serialization.protobuf)
+
+    // Local storage: DataStore (preferences) + Room (database)
+    implementation(libs.androidx.datastore)
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.room.runtime)
-    implementation(libs.billing)
-    implementation(libs.coil.compose)
-    implementation(libs.coil.network.okhttp)
+    ksp(libs.androidx.room.compiler)
+
+    // Firebase: analytics, auth, crash reporting, push
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.auth)
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.messaging)
-    implementation(libs.koin.android)
-    implementation(libs.koin.androidx.compose)
-    implementation(libs.kotlinx.coroutines.play.services)
-    implementation(libs.kotlinx.serialization.json)
-    implementation(libs.kotlinx.serialization.protobuf)
-    implementation(libs.okhttp)
-    implementation(libs.okhttp.logging)
+
+    // Google Play: in-app review + in-app update
     implementation(libs.play.app.update)
     implementation(libs.play.review)
-    implementation(libs.retrofit)
-    implementation(libs.retrofit.kotlinx.serialization)
-    implementation(libs.timber)
+
+    // Monetization: AdMob ads, UMP consent, Play Billing ("remove ads"); off unless ads.enabled=true
+    implementation(libs.admob)
+    implementation(libs.billing)
     implementation(libs.ump)
-    ksp(libs.androidx.room.compiler)
+
+    // Image loading (Coil 3)
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
+
+    // Logging
+    implementation(libs.timber)
+
+    // Code quality: Compose rules for ktlint
     ktlintRuleset(libs.compose.rules.ktlint)
 
+    // Unit tests (JVM + Robolectric)
     testImplementation(libs.androidx.room.testing)
     testImplementation(libs.androidx.test.core)
     testImplementation(libs.junit)
@@ -240,10 +270,13 @@ dependencies {
     testImplementation(libs.robolectric)
     testImplementation(libs.turbine)
 
+    // Instrumented tests (device)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
+
+    // Debug-only tooling: Compose previews/inspector, test manifest
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
 }
