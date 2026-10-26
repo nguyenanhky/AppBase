@@ -1,6 +1,7 @@
 package com.viettel.appbase.data.repository
 
 import com.google.firebase.FirebaseNetworkException
+import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
@@ -13,6 +14,12 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.tasks.await
 
 class FirebaseAuthBackend(private val firebaseProvider: FirebaseProvider) : AuthBackend {
+    override suspend fun signInAnonymously(): BackendAuthSession = firebaseCall {
+        val auth = requireAuth()
+        val user = auth.currentUser ?: requireNotNull(auth.signInAnonymously().await().user)
+        user.toSession()
+    }
+
     override suspend fun login(email: String, password: String): BackendAuthSession = firebaseCall {
         val user = requireNotNull(requireAuth().signInWithEmailAndPassword(email, password).await().user)
         user.toSession()
@@ -23,8 +30,15 @@ class FirebaseAuthBackend(private val firebaseProvider: FirebaseProvider) : Auth
         password: String,
         displayName: String,
     ): BackendAuthSession = firebaseCall {
-        val user = requireNotNull(requireAuth().createUserWithEmailAndPassword(email, password).await().user)
-        user.toSession(displayName)
+        val auth = requireAuth()
+        val anonymous = auth.currentUser?.takeIf { it.isAnonymous }
+        // Linking keeps the anonymous uid, so server-side quota and local history stay with the user.
+        val user = if (anonymous != null) {
+            anonymous.linkWithCredential(EmailAuthProvider.getCredential(email, password)).await().user
+        } else {
+            auth.createUserWithEmailAndPassword(email, password).await().user
+        }
+        requireNotNull(user).toSession(displayName)
     }
 
     // Firebase keeps its own refresh token, so the stored one is not needed.
@@ -49,6 +63,7 @@ class FirebaseAuthBackend(private val firebaseProvider: FirebaseProvider) : Auth
         email = email.orEmpty(),
         displayName = preferredDisplayName.ifBlank { displayName.orEmpty() },
         accessToken = requireNotNull(getIdToken(forceRefresh).await().token) { "Firebase returned an empty token." },
+        isAnonymous = isAnonymous,
     )
 
     // Order matters: WeakPassword is a subclass of InvalidCredentials.

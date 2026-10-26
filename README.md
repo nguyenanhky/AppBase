@@ -18,7 +18,7 @@ Starter project Android production-ready dùng Kotlin, Jetpack Compose, Clean Ar
 
 | Flavor | Auth | `BASE_URL` | Ghi chú |
 |---|---|---|---|
-| `mock` | Fake (local) | dev | Chạy ngay sau khi clone. Nhập email hợp lệ và mật khẩu từ 6 ký tự. Không có bản release |
+| `mock` | Fake (local), AI giả lập | dev | Chạy ngay sau khi clone, vào thẳng app ở chế độ khách. Đăng nhập/tạo tài khoản ở Cài đặt bằng email hợp lệ + mật khẩu từ 6 ký tự. Không có bản release |
 | `dev` | Firebase/REST thật | dev | Test backend thật trên bản debug |
 | `prod` | Firebase/REST thật | production | Bản upload Google Play (`bundleProdRelease`) |
 
@@ -39,18 +39,19 @@ Debug build có suffix `.debug` nên cài song song được với bản release
 - `core/`: networking, typed DataStore, Room, DI, logging và notification.
 - `domain/`: model, repository interface và use case thuần Kotlin.
 - `data/`: Firebase/REST implementation, DTO, DAO và entity.
-- `feature/`: login, register và home/settings. Mỗi màn có ViewModel kế thừa `BaseViewModel<State, Event>`.
+- `feature/`: login, register, home/settings và quét AI. Mỗi màn có ViewModel kế thừa `BaseViewModel<State, Event>`.
+- `worker/`: Cloudflare Worker (TypeScript) cho AI: xác minh token, quota, gọi Gemini, lưu báo cáo.
 - `ui/`: Material 3 theme, token và component dùng lại.
 - `navigation/`: route type-safe và deep link `appbase://home`.
 
-Token đăng nhập được lưu trong typed DataStore (protobuf), toàn bộ file được mã hoá AES-GCM bằng khoá Android Keystore. Request nhận HTTP 401 sẽ tự refresh token một lần (`TokenAuthenticator`); refresh bị từ chối thì đăng xuất và auth gate trong `AppNavHost` đưa người dùng về Login.
+Token đăng nhập được lưu trong typed DataStore (protobuf), toàn bộ file được mã hoá AES-GCM bằng khoá Android Keystore. Request nhận HTTP 401 sẽ tự refresh token một lần (`TokenAuthenticator`); refresh bị từ chối thì xoá phiên và tạo lại phiên ẩn danh (người dùng ở lại app, không bị đá ra màn Login).
 
 ### Viết màn hình mới
 
 1. Tạo `XxxUiState` (data class) và, nếu cần, `XxxEvent` (sealed interface cho điều hướng/snackbar).
 2. ViewModel kế thừa `BaseViewModel<XxxUiState, XxxEvent>`, dùng `updateState {}`, `sendEvent()` và `launchSafely(onError = ...)`.
 3. Screen đọc `state` bằng `collectAsStateWithLifecycle()`, nhận event bằng `ObserveEvents`, hiển thị lỗi bằng `error.toUserMessage()`.
-4. Route cần đăng nhập không phải làm gì thêm; route công khai thì thêm vào `requiresAuth()` trong `AppRoutes.kt`.
+4. Mặc định mọi màn dùng được với phiên ẩn danh. Màn cần **tài khoản thật** (hồ sơ, đồng bộ...) thì thêm vào `accountRoutes` trong `AppRoutes.kt`: người dùng ẩn danh mở màn đó sẽ được chuyển sang Login.
 
 Lỗi đi qua các tầng dưới dạng `AppError`. Gọi Retrofit luôn bọc trong `apiCall {}` để HTTP/IO/parse error được đổi sang `AppError`. Room export schema vào `app/schemas`; khi đổi schema: tăng `AppDatabase.VERSION`, build để sinh file JSON mới, thêm `Migration` vào `AppDatabase.MIGRATIONS` và bổ sung `AppDatabaseMigrationTest` (chạy bằng Robolectric nên CI kiểm tra luôn, không cần emulator). Token, FCM token và database được loại khỏi Android cloud backup/device transfer.
 
@@ -67,7 +68,7 @@ Lỗi đi qua các tầng dưới dạng `AppError`. Gọi Retrofit luôn bọc 
 
 1. Tạo Android app trong Firebase Console với đúng `applicationId`.
 2. Tải `google-services.json` vào `app/google-services.json`.
-3. Bật Email/Password Auth, Crashlytics và Cloud Messaging.
+3. Bật Email/Password **và Anonymous** sign-in, Crashlytics, Cloud Messaging, App Check (Play Integrity).
 4. Với Firebase Auth Emulator, cấu hình emulator trước khi gọi Auth trong `FirebaseProvider` ở debug build.
 5. Chạy app, đăng nhập và gửi notification thử từ Firebase Console.
 
@@ -102,10 +103,11 @@ Lưu ý: SDK AdMob vẫn nằm trong APK kể cả khi tắt (manifest luôn c�
 
 ## AI (ảnh → phân tích → kết quả)
 
-App **không chứa API key AI** và **không gửi prompt**: app gửi *tên task* + ảnh tới Cloudflare Worker của bạn; Worker giữ key Gemini, prompt, JSON schema và quota. Code: `core/ai/`, `core/image/`, màn demo `feature/scan/` (tab "Quét AI").
+App **không chứa API key AI** và **không gửi prompt**: app gửi *tên task* + ảnh tới Cloudflare Worker của bạn; Worker giữ key Gemini, prompt, JSON schema và quota. Code app: `core/ai/`, `core/image/`, màn demo `feature/scan/` (tab "Quét AI"). Code Worker + hướng dẫn deploy: [`worker/`](worker/README.md).
 
 - **Flavor `mock`**: `FakeAiClient` trả kết quả mẫu theo task và giả lập quota 5 lượt/ngày, chạy offline, không tốn tiền.
-- **`dev` / `prod`**: `WorkerAiClient` gọi `ai.workerUrl` (đặt trong `gradle.properties`). Mỗi request kèm Firebase ID token (`Authorization: Bearer`) và App Check token (`X-Firebase-AppCheck`); 401 tự refresh token.
+- **`dev` / `prod`**: `WorkerAiClient` gọi `ai.workerUrl.dev` / `ai.workerUrl.prod` (đặt trong `gradle.properties`). Mỗi request kèm Firebase ID token (`Authorization: Bearer`) và App Check token (`X-Firebase-AppCheck`); 401 tự refresh token; 403 `app_check_failed` → "không xác minh được ứng dụng".
+- **Danh tính**: không bắt buộc đăng nhập. Lần đầu mở app tự tạo **phiên ẩn danh** (Firebase Anonymous Auth) để Worker đếm quota; tạo tài khoản sau đó sẽ **nâng cấp phiên ẩn danh** (giữ uid, quota và lịch sử). Đăng nhập tài khoản khác hoặc đăng xuất sẽ xoá lịch sử AI trên máy. Tính năng AI cần `FirebaseAuthBackend` (Worker chỉ xác minh Firebase ID token).
 - **App Check**: debug build dùng debug provider (lấy token trong logcat, đăng ký ở Firebase Console > App Check); release dùng Play Integrity. Bật *enforcement* trên Worker khi phát hành.
 - **Ảnh**: `rememberImagePicker()` (Photo Picker + camera hệ thống, **không xin quyền**; đừng khai báo quyền CAMERA). `ImagePreprocessor` xoay đúng chiều, thu về cạnh dài 1024px, JPEG 85, **xoá EXIF/GPS**.
 - **Lịch sử**: `AiHistoryRepository` (Room, bảng `ai_history`, lưu kết quả JSON + ảnh thu nhỏ).

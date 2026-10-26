@@ -13,6 +13,9 @@ performance:
     active: false
 
 complexity:
+  CyclomaticComplexMethod:
+    # Mapping tables (one `when` branch per sealed subtype, e.g. AppError -> message) are flat, not complex.
+    ignoreSimpleWhenEntries: true
   LongParameterList:
     # Composables take many optional parameters by design.
     ignoreAnnotated: ['Composable']

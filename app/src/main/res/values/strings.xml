@@ -71,4 +71,7 @@
         <item quantity="one">%1$d free scan left today</item>
         <item quantity="other">%1$d free scans left today</item>
     </plurals>
+    <string name="guest_mode_hint">You are using guest mode. Create an account to keep your data when you change phones.</string>
+    <string name="login_or_register">Sign in / Create account</string>
+    <string name="error_app_not_verified">This app could not be verified. Please update it from Google Play.</string>
 </resources>

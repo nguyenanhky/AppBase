@@ -14,6 +14,7 @@ data class AppPreferences(
     val firstLaunchEpochMillis: Long = 0,
     val lastReviewPromptEpochMillis: Long = 0,
     val adFree: Boolean = false,
+    val isAnonymous: Boolean = false,
 )
 
 @Serializable

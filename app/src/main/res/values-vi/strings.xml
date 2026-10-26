@@ -69,4 +69,7 @@
     <plurals name="ai_quota_remaining">
         <item quantity="other">Còn %1$d lượt quét miễn phí hôm nay</item>
     </plurals>
+    <string name="guest_mode_hint">Bạn đang dùng chế độ khách. Tạo tài khoản để không mất dữ liệu khi đổi điện thoại.</string>
+    <string name="login_or_register">Đăng nhập / Tạo tài khoản</string>
+    <string name="error_app_not_verified">Không xác minh được ứng dụng. Hãy cập nhật ứng dụng từ Google Play.</string>
 </resources>

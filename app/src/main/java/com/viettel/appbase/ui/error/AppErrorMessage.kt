@@ -20,5 +20,6 @@ fun AppError.toUserMessage(): String = when (this) {
     is AppError.QuotaExceeded -> stringResource(R.string.error_quota_exceeded)
     is AppError.ContentBlocked -> stringResource(R.string.error_content_blocked)
     is AppError.InvalidImage -> stringResource(R.string.error_invalid_image)
+    is AppError.AppNotVerified -> stringResource(R.string.error_app_not_verified)
     is AppError.Unknown -> stringResource(R.string.error_unknown)
 }

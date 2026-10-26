@@ -8,12 +8,17 @@ import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import retrofit2.HttpException
 
-class WorkerAiClient(private val api: AiApi, private val json: Json) : AiClient {
+class WorkerAiClient(
+    private val api: AiApi,
+    private val json: Json,
+    private val sessionGuard: AiSessionGuard,
+) : AiClient {
     override suspend fun <T> run(
         task: String,
         input: AiInput,
         resultSerializer: KSerializer<T>,
     ): AiResult<T> {
+        sessionGuard.ensureSession()
         val request = AiRunRequest(
             task = task,
             locale = Locale.getDefault().toLanguageTag(),
@@ -53,11 +58,14 @@ class WorkerAiClient(private val api: AiApi, private val json: Json) : AiClient 
 
             body?.error == "content_blocked" -> AppError.ContentBlocked(this)
 
+            code() == HTTP_FORBIDDEN && body?.error == "app_check_failed" -> AppError.AppNotVerified(this)
+
             else -> null
         }
     }
 
     private companion object {
+        const val HTTP_FORBIDDEN = 403
         const val HTTP_TOO_MANY_REQUESTS = 429
     }
 }

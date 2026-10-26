@@ -22,6 +22,9 @@ sealed class AppError(cause: Throwable? = null) : Exception(cause) {
 
     class InvalidImage(cause: Throwable? = null) : AppError(cause)
 
+    /** App Check rejected the request: modified app, emulator, or not installed from Google Play. */
+    class AppNotVerified(cause: Throwable? = null) : AppError(cause)
+
     /** [code] is null when the response could not be parsed. */
     class Server(val code: Int? = null, cause: Throwable? = null) : AppError(cause)
     class Unknown(cause: Throwable? = null) : AppError(cause)

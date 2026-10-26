@@ -8,8 +8,15 @@ import com.viettel.appbase.data.remote.dto.RefreshTokenRequestDto
 import com.viettel.appbase.data.remote.dto.RegisterRequestDto
 import com.viettel.appbase.domain.model.AppError
 
-/** [AuthBackend] for your own REST API. Adjust [AuthApi] and the DTOs to match the server contract. */
+/**
+ * [AuthBackend] for your own REST API. Adjust [AuthApi] and the DTOs to match the server contract.
+ * Note: the AI Worker verifies Firebase ID tokens, so AI features need FirebaseAuthBackend.
+ */
 class RetrofitAuthBackend(private val api: AuthApi) : AuthBackend {
+    // Add an anonymous/guest endpoint to your API and call it here if the app allows guests.
+    override suspend fun signInAnonymously(): BackendAuthSession =
+        throw AppError.Unknown(UnsupportedOperationException("Anonymous sessions are not supported by this backend"))
+
     override suspend fun login(email: String, password: String): BackendAuthSession =
         credentialsCall { api.login(LoginRequestDto(email, password)) }.toSession()
 

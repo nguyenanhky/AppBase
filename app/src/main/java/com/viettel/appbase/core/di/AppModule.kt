@@ -25,7 +25,14 @@ val appModule = module {
     // Using your own REST API instead of Firebase Auth? Bind RetrofitAuthBackend(get()) here.
     single<AuthBackend> { FirebaseAuthBackend(get()) }
     single<AuthRepository> {
-        if (BuildConfig.USE_FAKE_AUTH) FakeAuthRepository(get()) else AuthRepositoryImpl(get(), get(), get())
+        if (BuildConfig.USE_FAKE_AUTH) {
+            FakeAuthRepository(
+                get(),
+                get(),
+            )
+        } else {
+            AuthRepositoryImpl(get(), get(), get(), get())
+        }
     }
     single<TokenRefresher> { AuthTokenRefresher(get()) }
     factory { LoginUseCase(get()) }

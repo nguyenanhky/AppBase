@@ -7,6 +7,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navDeepLink
+import com.viettel.appbase.domain.model.AuthState
 import com.viettel.appbase.feature.auth.login.LoginScreen
 import com.viettel.appbase.feature.auth.register.RegisterScreen
 import com.viettel.appbase.feature.home.HomeScreen
@@ -14,30 +15,24 @@ import com.viettel.appbase.feature.home.HomeScreen
 @Composable
 fun AppNavHost(
     navController: NavHostController,
-    isAuthenticated: Boolean?,
+    authState: AuthState,
+    sessionReady: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    // Auth gate: whenever the session ends (logout, refresh failure), leave protected screens.
-    LaunchedEffect(isAuthenticated) {
+    // Account gate: anonymous users on an account-only screen are sent to Login.
+    LaunchedEffect(authState) {
         val destination = navController.currentDestination ?: return@LaunchedEffect
-        if (isAuthenticated == false && destination.requiresAuth()) {
-            navController.navigate(LoginRoute) { popUpTo(navController.graph.id) { inclusive = true } }
-        }
+        if (authState != AuthState.SignedIn && destination.requiresAccount()) navController.navigate(LoginRoute)
     }
 
     NavHost(navController = navController, startDestination = SplashRoute, modifier = modifier) {
-        // Invisible routing step (the system splash covers it). Deep links enter here
-        // so the session is checked before any protected screen opens.
+        // Invisible routing step (the system splash covers it while the session starts).
         composable<SplashRoute>(
             deepLinks = listOf(navDeepLink { uriPattern = DeepLinkHandler.HOME_URI }),
         ) {
-            LaunchedEffect(isAuthenticated) {
-                val route: Any = when (isAuthenticated) {
-                    true -> HomeRoute
-                    false -> LoginRoute
-                    null -> return@LaunchedEffect
-                }
-                navController.navigate(route) {
+            LaunchedEffect(sessionReady) {
+                if (!sessionReady) return@LaunchedEffect
+                navController.navigate(HomeRoute) {
                     popUpTo<SplashRoute> { inclusive = true }
                     launchSingleTop = true
                 }
@@ -45,22 +40,26 @@ fun AppNavHost(
         }
         composable<LoginRoute> {
             LoginScreen(
-                onLoginSuccess = {
-                    navController.navigate(HomeRoute) { popUpTo<LoginRoute> { inclusive = true } }
-                },
+                onLoginSuccess = { navController.backToHome() },
                 onRegister = { navController.navigate(RegisterRoute) },
             )
         }
         composable<RegisterRoute> {
             RegisterScreen(
-                onRegisterSuccess = {
-                    navController.navigate(HomeRoute) { popUpTo<LoginRoute> { inclusive = true } }
-                },
+                onRegisterSuccess = { navController.backToHome() },
                 onBack = navController::popBackStack,
             )
         }
         composable<HomeRoute> {
-            HomeScreen()
+            HomeScreen(
+                hasAccount = authState == AuthState.SignedIn,
+                onLoginClick = { navController.navigate(LoginRoute) },
+            )
         }
     }
+}
+
+/** Login/Register are opened on top of Home; return to it (or open it if it is not in the stack). */
+private fun NavHostController.backToHome() {
+    if (!popBackStack<HomeRoute>(inclusive = false)) navigate(HomeRoute) { popUpTo(graph.id) { inclusive = true } }
 }

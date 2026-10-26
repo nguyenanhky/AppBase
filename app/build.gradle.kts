@@ -82,12 +82,22 @@ android {
             buildConfigField("Boolean", "USE_FAKE_AUTH", "false")
             buildConfigField("Boolean", "USE_FAKE_AI", "false")
             buildConfigField("String", "BASE_URL", "\"https://dev.example.com/api/\"")
+            buildConfigField(
+                "String",
+                "AI_BASE_URL",
+                "\"${providers.gradleProperty("ai.workerUrl.dev").orNull ?: aiWorkerUrl}\"",
+            )
         }
         create("prod") {
             dimension = "environment"
             buildConfigField("Boolean", "USE_FAKE_AUTH", "false")
             buildConfigField("Boolean", "USE_FAKE_AI", "false")
             buildConfigField("String", "BASE_URL", "\"https://example.com/api/\"")
+            buildConfigField(
+                "String",
+                "AI_BASE_URL",
+                "\"${providers.gradleProperty("ai.workerUrl.prod").orNull ?: aiWorkerUrl}\"",
+            )
             manifestPlaceholders["adMobAppId"] = adMobValue("admob.appId", testAdMobAppId)
             buildConfigField("String", "ADMOB_BANNER_ID", "\"${adMobValue("admob.bannerId", testBannerId)}\"")
             buildConfigField(

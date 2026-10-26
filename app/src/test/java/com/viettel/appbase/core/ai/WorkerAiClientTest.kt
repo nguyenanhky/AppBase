@@ -18,6 +18,12 @@ class WorkerAiClientTest {
     private lateinit var server: MockWebServer
     private lateinit var client: WorkerAiClient
     private val json = Json { ignoreUnknownKeys = true }
+    private var sessionError: Throwable? = null
+    private val sessionGuard = object : AiSessionGuard {
+        override suspend fun ensureSession() {
+            sessionError?.let { throw it }
+        }
+    }
 
     @Serializable
     data class Result(val name: String)
@@ -27,7 +33,7 @@ class WorkerAiClientTest {
         server = MockWebServer()
         server.start()
         val api = ApiClient.create(server.url("/").toString(), OkHttpClient(), json).create(AiApi::class.java)
-        client = WorkerAiClient(api, json)
+        client = WorkerAiClient(api, json, sessionGuard)
     }
 
     @After
@@ -73,6 +79,21 @@ class WorkerAiClientTest {
         server.enqueue(MockResponse().setResponseCode(422).setBody("""{"error":"content_blocked"}"""))
 
         assertTrue(failure { client.run("identify", AiInput(), Result.serializer()) } is AppError.ContentBlocked)
+    }
+
+    @Test
+    fun `app_check_failed becomes AppNotVerified`() = runTest {
+        server.enqueue(MockResponse().setResponseCode(403).setBody("""{"error":"app_check_failed"}"""))
+
+        assertTrue(failure { client.run("identify", AiInput(), Result.serializer()) } is AppError.AppNotVerified)
+    }
+
+    @Test
+    fun `no session and offline fails before calling the Worker`() = runTest {
+        sessionError = AppError.Network()
+
+        assertTrue(failure { client.run("identify", AiInput(), Result.serializer()) } is AppError.Network)
+        assertEquals(0, server.requestCount)
     }
 
     @Test

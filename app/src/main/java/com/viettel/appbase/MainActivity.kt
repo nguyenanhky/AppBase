@@ -24,8 +24,8 @@ class MainActivity : ComponentActivity() {
     private val viewModel: MainViewModel by viewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // System splash stays until theme and session are loaded: no theme flash, no second splash screen.
-        installSplashScreen().setKeepOnScreenCondition { viewModel.state.value.isAuthenticated == null }
+        // System splash stays until theme and session are ready: no theme flash, no second splash screen.
+        installSplashScreen().setKeepOnScreenCondition { !viewModel.state.value.sessionReady }
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent { AppRoot(this, viewModel) }
@@ -49,7 +49,7 @@ private fun AppRoot(activity: ComponentActivity, viewModel: MainViewModel) {
         ThemeMode.DARK -> true
     }
     AppTheme(darkTheme = darkTheme) {
-        AppNavHost(navController, isAuthenticated = state.isAuthenticated)
+        AppNavHost(navController, authState = state.authState, sessionReady = state.sessionReady)
         InAppUpdateHandler()
         MonetizationInitializer()
     }

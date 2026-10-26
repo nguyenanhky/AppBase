@@ -24,7 +24,6 @@ data class HomeUiState(
     val monetization: MonetizationUiState = MonetizationUiState(),
 )
 
-/** Navigation after logout is handled by the app-wide auth gate in AppNavHost. */
 class HomeViewModel(
     private val logout: LogoutUseCase,
     private val appDataStore: AppDataStore,
@@ -63,7 +62,9 @@ class HomeViewModel(
         if (currentState.isLoggingOut) return
         launchSafely(onError = { updateState { copy(isLoggingOut = false) } }) {
             updateState { copy(isLoggingOut = true) }
+            // The user stays on Home with a fresh anonymous session.
             logout.invoke()
+            updateState { copy(isLoggingOut = false) }
         }
     }
 

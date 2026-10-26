@@ -4,11 +4,17 @@ import com.viettel.appbase.core.base.BaseViewModel
 import com.viettel.appbase.core.playstore.InAppReviewController
 import com.viettel.appbase.core.storage.AppDataStore
 import com.viettel.appbase.core.storage.ThemeMode
+import com.viettel.appbase.domain.model.AuthState
 import com.viettel.appbase.domain.repository.AuthRepository
 import kotlinx.coroutines.flow.combine
+import timber.log.Timber
 
-/** [isAuthenticated] is null until the stored session has been read. */
-data class MainUiState(val themeMode: ThemeMode = ThemeMode.SYSTEM, val isAuthenticated: Boolean? = null)
+/** [sessionReady] turns true once the startup session attempt finished (success or offline failure). */
+data class MainUiState(
+    val themeMode: ThemeMode = ThemeMode.SYSTEM,
+    val authState: AuthState = AuthState.SignedOut,
+    val sessionReady: Boolean = false,
+)
 
 class MainViewModel(
     authRepository: AuthRepository,
@@ -18,9 +24,14 @@ class MainViewModel(
     init {
         launchSafely { reviewController.onAppLaunched() }
         launchSafely {
-            combine(appDataStore.themeMode, authRepository.isAuthenticated) { themeMode, authenticated ->
-                MainUiState(themeMode, authenticated)
-            }.collect { state -> updateState { state } }
+            // Offline at first launch is fine: AI calls retry ensureSession() before each request.
+            authRepository.ensureSession().onFailure { Timber.w(it, "Could not start a session") }
+            updateState { copy(sessionReady = true) }
+        }
+        launchSafely {
+            combine(appDataStore.themeMode, authRepository.authState, ::Pair).collect { (themeMode, authState) ->
+                updateState { copy(themeMode = themeMode, authState = authState) }
+            }
         }
     }
 }

@@ -56,7 +56,12 @@ private enum class HomeTab(val icon: ImageVector) {
 }
 
 @Composable
-fun HomeScreen(modifier: Modifier = Modifier, viewModel: HomeViewModel = koinViewModel()) {
+fun HomeScreen(
+    hasAccount: Boolean,
+    onLoginClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: HomeViewModel = koinViewModel(),
+) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     var currentTab by rememberSaveable { mutableStateOf(HomeTab.HOME) }
     val stateHolder = rememberSaveableStateHolder()
@@ -104,6 +109,8 @@ fun HomeScreen(modifier: Modifier = Modifier, viewModel: HomeViewModel = koinVie
                     padding = padding,
                     themeMode = state.themeMode,
                     onThemeModeChange = viewModel::setThemeMode,
+                    hasAccount = hasAccount,
+                    onLoginClick = onLoginClick,
                     onLogout = viewModel::logout,
                     monetization = state.monetization,
                     onRemoveAds = { activity?.let(viewModel::removeAds) },
@@ -135,6 +142,8 @@ private fun SettingsTab(
     padding: PaddingValues,
     themeMode: ThemeMode,
     onThemeModeChange: (ThemeMode) -> Unit,
+    hasAccount: Boolean,
+    onLoginClick: () -> Unit,
     onLogout: () -> Unit,
     monetization: MonetizationUiState,
     onRemoveAds: () -> Unit,
@@ -175,7 +184,12 @@ private fun SettingsTab(
             onClick = { context.openPlayStoreListing() },
             style = AppButtonStyle.OUTLINED,
         )
-        AppButton(stringResource(R.string.logout_action), onClick = onLogout)
+        if (hasAccount) {
+            AppButton(stringResource(R.string.logout_action), onClick = onLogout)
+        } else {
+            Text(stringResource(R.string.guest_mode_hint), style = MaterialTheme.typography.bodySmall)
+            AppButton(stringResource(R.string.login_or_register), onClick = onLoginClick)
+        }
     }
 }
 
