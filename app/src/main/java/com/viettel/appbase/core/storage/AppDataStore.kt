@@ -55,4 +55,17 @@ class AppDataStore(private val dataStore: DataStore<AppPreferences>, application
     suspend fun setThemeMode(mode: ThemeMode) {
         dataStore.updateData { it.copy(themeMode = mode) }
     }
+
+    suspend fun recordLaunch(nowEpochMillis: Long) {
+        dataStore.updateData {
+            it.copy(
+                launchCount = it.launchCount + 1,
+                firstLaunchEpochMillis = it.firstLaunchEpochMillis.takeIf { first -> first > 0 } ?: nowEpochMillis,
+            )
+        }
+    }
+
+    suspend fun markReviewPrompted(nowEpochMillis: Long) {
+        dataStore.updateData { it.copy(lastReviewPromptEpochMillis = nowEpochMillis) }
+    }
 }

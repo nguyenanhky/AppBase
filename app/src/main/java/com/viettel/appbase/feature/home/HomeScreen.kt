@@ -20,6 +20,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -28,12 +29,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.viettel.appbase.BuildConfig
 import com.viettel.appbase.R
+import com.viettel.appbase.core.playstore.openPlayStoreListing
+import com.viettel.appbase.core.playstore.rememberInAppReview
 import com.viettel.appbase.core.storage.ThemeMode
 import com.viettel.appbase.ui.components.AppButton
+import com.viettel.appbase.ui.components.AppButtonStyle
 import com.viettel.appbase.ui.components.LoadingDialog
 import com.viettel.appbase.ui.theme.LocalAppSpacing
 import org.koin.androidx.compose.koinViewModel
@@ -49,6 +54,10 @@ fun HomeScreen(modifier: Modifier = Modifier, viewModel: HomeViewModel = koinVie
     val state by viewModel.state.collectAsStateWithLifecycle()
     var currentTab by rememberSaveable { mutableStateOf(HomeTab.HOME) }
     val stateHolder = rememberSaveableStateHolder()
+    val requestReview = rememberInAppReview()
+    // Demo trigger: ReviewPolicy only lets it through for engaged users. In a real app,
+    // call requestReview() right after a positive moment instead (task done, goal reached...).
+    LaunchedEffect(Unit) { requestReview() }
 
     Scaffold(
         modifier = modifier,
@@ -139,6 +148,12 @@ private fun SettingsTab(
                 notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             })
         }
+        val context = LocalContext.current
+        AppButton(
+            text = stringResource(R.string.rate_app),
+            onClick = { context.openPlayStoreListing() },
+            style = AppButtonStyle.OUTLINED,
+        )
         AppButton(stringResource(R.string.logout_action), onClick = onLogout)
     }
 }

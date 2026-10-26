@@ -37,4 +37,4 @@ val appModule = module {
     viewModelOf(::HomeViewModel)
 }
 
-val appModules = listOf(databaseModule, networkModule, appModule)
+val appModules = listOf(databaseModule, networkModule, playStoreModule, appModule)

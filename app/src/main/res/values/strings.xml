@@ -43,4 +43,9 @@
     <string name="error_session_expired">Your session has expired. Please sign in again.</string>
     <string name="error_server">The server is having trouble. Please try again later.</string>
     <string name="error_unknown">Something went wrong. Please try again.</string>
+    <string name="rate_app">Rate this app</string>
+    <string name="update_ready_title">Update ready</string>
+    <string name="update_ready_message">A new version has been downloaded. Restart the app to finish updating.</string>
+    <string name="update_restart">Restart</string>
+    <string name="update_later">Later</string>
 </resources>

@@ -73,6 +73,14 @@ Lỗi đi qua các tầng dưới dạng `AppError`. Gọi Retrofit luôn bọc 
 
 Google Services và Crashlytics Gradle plugin chỉ được bật khi file cấu hình tồn tại, nên clone mới vẫn build được. `google-services.json`, keystore và `keystore.properties` được ignore khỏi template.
 
+## Đánh giá và cập nhật trong app (Google Play)
+
+Code nằm trong `core/playstore/`. Cả hai chỉ hoạt động khi app được cài từ Google Play; bản mock, emulator hoặc APK cài tay sẽ bỏ qua yên lặng.
+
+- **In-App Review**: gọi `rememberInAppReview()` rồi gọi callback ngay sau một khoảnh khắc tích cực (hoàn thành việc, đạt mục tiêu). `ReviewPolicy` chỉ cho hiện khi đã mở app ≥ 5 lần, cài ≥ 3 ngày và cách lần hỏi trước ≥ 60 ngày. Nút "Đánh giá ứng dụng" dùng `openPlayStoreListing()`, không dùng In-App Review (Google có hạn mức, hộp thoại có thể không hiện).
+- **In-App Update**: `InAppUpdateHandler` ở gốc app kiểm tra mỗi lần app trở lại foreground. Priority ≥ 4 → bắt buộc cập nhật (immediate); priority ≥ 2 hoặc bản mới đã ra ≥ 3 ngày → cập nhật nền (flexible), tải xong thì hỏi khởi động lại. Priority đặt cho từng bản phát hành qua Play Developer API (`inAppUpdatePriority`); Play Console không có ô nhập priority.
+- **Thử trên máy thật**: upload 2 bản (versionCode khác nhau) lên *Internal app sharing* hoặc track *Internal testing*, cài bản thấp từ link Play rồi mở app.
+
 ## Release Google Play
 
 ```bash

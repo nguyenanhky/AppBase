@@ -41,6 +41,8 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("Boolean", "FIREBASE_CONFIGURED", hasGoogleServices.toString())
+        // Store listing id: without the .debug suffix, so "Rate app" always opens the real listing.
+        buildConfigField("String", "PLAY_STORE_PACKAGE", "\"$applicationId\"")
     }
 
     flavorDimensions += "environment"
@@ -187,6 +189,8 @@ dependencies {
     implementation(libs.kotlinx.serialization.protobuf)
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging)
+    implementation(libs.play.app.update)
+    implementation(libs.play.review)
     implementation(libs.retrofit)
     implementation(libs.retrofit.kotlinx.serialization)
     implementation(libs.timber)

@@ -42,4 +42,9 @@
     <string name="error_session_expired">Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.</string>
     <string name="error_server">Máy chủ đang gặp sự cố. Vui lòng thử lại sau.</string>
     <string name="error_unknown">Đã có lỗi xảy ra. Vui lòng thử lại.</string>
+    <string name="rate_app">Đánh giá ứng dụng</string>
+    <string name="update_ready_title">Bản cập nhật đã sẵn sàng</string>
+    <string name="update_ready_message">Phiên bản mới đã tải xong. Khởi động lại ứng dụng để hoàn tất cập nhật.</string>
+    <string name="update_restart">Khởi động lại</string>
+    <string name="update_later">Để sau</string>
 </resources>
